@@ -42,3 +42,9 @@ logs/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local notes and scratch files
+.project-notes.md
+.notes.md
+.scratch.md
+*.local.md
