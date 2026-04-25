@@ -65,7 +65,7 @@ async def _call_stage_json(
     system_header: str,
     user: str,
     max_tokens: int,
-    retries: int = 2,
+    retries: int = 3,
 ) -> tuple[dict[str, Any], LLMResult]:
     last_err: Exception | None = None
     for attempt in range(retries + 1):
@@ -202,7 +202,8 @@ async def validate_report_llm(
         model=settings.model_reasoning,
         system_header=system,
         user=user,
-        max_tokens=settings.max_tokens,
+        max_tokens=settings.max_tokens_validate,
+        retries=4,
     )
     report = AnalysisReport.model_validate(data)
     return report, res

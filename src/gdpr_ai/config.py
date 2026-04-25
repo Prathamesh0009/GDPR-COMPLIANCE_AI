@@ -46,7 +46,8 @@ class Settings(BaseSettings):
         validation_alias="TOPIC_DEMOTE_FACTOR",
         description="Dense-score multiplier for chunks with no topic-tag overlap when some overlap exists.",
     )
-    max_tokens: int = Field(default=4096, validation_alias="MAX_TOKENS")
+    max_tokens: int = Field(default=8192, validation_alias="MAX_TOKENS")
+    max_tokens_validate: int = Field(default=12288, validation_alias="MAX_TOKENS_VALIDATE")
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
 
     chroma_collection: str = Field(default="gdpr_ai_chunks", validation_alias="CHROMA_COLLECTION")

@@ -45,16 +45,53 @@ def estimate_cost_eur(model: str, input_tokens: int, output_tokens: int) -> floa
     return _estimate_cost_eur(model, input_tokens, output_tokens)
 
 
+def _strip_markdown_json_fence(raw: str) -> str:
+    """Remove optional ``` / ```json wrappers so brace scanning sees real JSON."""
+    text = raw.strip()
+    fence = re.search(r"^```(?:json)?\s*([\s\S]*?)\s*```", text, flags=re.IGNORECASE)
+    if fence:
+        return fence.group(1).strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE).strip()
+        if text.endswith("```"):
+            text = text[:-3].strip()
+    return text
+
+
+def _slice_balanced_json_object(s: str) -> str:
+    """Return the substring of the first top-level `{...}` object (strings-aware)."""
+    start = s.find("{")
+    if start == -1:
+        raise ValueError("No JSON object found in model output")
+    depth = 0
+    in_string = False
+    escape = False
+    for i in range(start, len(s)):
+        ch = s[i]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return s[start : i + 1]
+    raise ValueError("Unclosed JSON object in model output (truncated or invalid)")
+
+
 def extract_json_object(raw: str) -> dict[str, Any]:
     """Parse the first JSON object from a model response."""
-    cleaned = raw.strip()
-    if cleaned.startswith("```"):
-        cleaned = re.sub(r"^```[a-zA-Z]*", "", cleaned).strip("` \n")
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
-    if start == -1 or end == -1 or end <= start:
-        raise ValueError("No JSON object found in model output")
-    return json.loads(cleaned[start : end + 1])
+    cleaned = _strip_markdown_json_fence(raw)
+    payload = _slice_balanced_json_object(cleaned)
+    return json.loads(payload)
 
 
 async def complete_text(

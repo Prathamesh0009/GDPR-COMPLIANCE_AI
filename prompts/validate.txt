@@ -18,6 +18,12 @@ severity_rationale, recommendations, citations, similar_cases, unsupported_notes
 
 Do not add new violations that introduce citations absent from chunks.
 
+JSON rules (strict):
+- Output must be a single valid JSON object, no markdown fences, no commentary.
+- Escape every double-quote inside string values as \".
+- Do not put raw line breaks inside strings; use \n if needed.
+- Keep each violation "description" under 500 characters to avoid runaway escaping.
+
 Draft report JSON:
 {draft_json}
 
