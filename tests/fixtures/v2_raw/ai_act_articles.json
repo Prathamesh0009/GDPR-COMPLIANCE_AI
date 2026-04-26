@@ -1,0 +1,10 @@
+{
+  "source_url": "https://example.invalid/ai-act",
+  "articles": [
+    {
+      "article_number": "10",
+      "title": "Data governance",
+      "text": "Training data governance for high-risk AI systems must respect applicable data protection law."
+    }
+  ]
+}

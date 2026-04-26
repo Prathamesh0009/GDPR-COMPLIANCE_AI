@@ -1,8 +1,9 @@
 """Hybrid retrieval over ChromaDB (dense) plus an optional BM25 sidecar index."""
 from __future__ import annotations
 
+import logging
 import pickle
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 import chromadb
@@ -12,6 +13,8 @@ from gdpr_ai.exceptions import KnowledgeBaseError
 from gdpr_ai.knowledge.bm25_tokens import bm25_tokenize
 from gdpr_ai.knowledge.embeddings import embed_texts
 from gdpr_ai.models import ClassifiedTopics, ExtractedEntities, RetrievedChunk
+
+logger = logging.getLogger(__name__)
 
 
 def _dense_query_text(query: str, topics: ClassifiedTopics) -> str:
@@ -157,5 +160,90 @@ def retrieve(
             )
         )
         if len(out) >= k:
+            break
+    return out
+
+
+def default_v2_collection_names() -> list[str]:
+    """Chroma collection names for v2 auxiliary knowledge."""
+    return [
+        settings.chroma_collection_dpia,
+        settings.chroma_collection_ropa,
+        settings.chroma_collection_tom,
+        settings.chroma_collection_consent,
+        settings.chroma_collection_ai_act,
+    ]
+
+
+def retrieve_multi_collection(
+    query: str,
+    collection_names: Sequence[str] | None = None,
+    *,
+    top_k_per_collection: int = 8,
+    top_k: int = 20,
+) -> list[RetrievedChunk]:
+    """Dense retrieval across multiple Chroma collections; merge by relevance (no BM25 fusion).
+
+    Each result's metadata includes ``chroma_collection`` with the source collection name.
+    """
+    if collection_names is not None:
+        names = list(collection_names)
+    else:
+        names = default_v2_collection_names()
+    chroma_dir = settings.chroma_path
+    if not chroma_dir.exists():
+        raise KnowledgeBaseError(
+            "ChromaDB directory not found. Build the knowledge base first "
+            "(see README / scripts/chunk_and_embed.py)."
+        )
+    client = chromadb.PersistentClient(path=str(chroma_dir))
+    q_vec = embed_texts(settings.embedding_model, [query])[0]
+
+    candidates: list[tuple[float, RetrievedChunk]] = []
+    for coll_name in names:
+        try:
+            coll = client.get_collection(coll_name)
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Skipping missing v2 collection %s: %s", coll_name, exc)
+            continue
+        n_docs = max(1, coll.count())
+        n_res = min(top_k_per_collection, n_docs)
+        raw = coll.query(
+            query_embeddings=[q_vec],
+            n_results=n_res,
+            include=["documents", "metadatas", "distances"],
+        )
+        ids = raw["ids"][0]
+        docs = raw["documents"][0]
+        metas = raw["metadatas"][0]
+        dists = raw["distances"][0]
+        for cid, doc, meta, dist in zip(ids, docs, metas, dists, strict=True):
+            score = 1.0 / (1.0 + float(dist))
+            meta_str = {str(k): "" if v is None else str(v) for k, v in (meta or {}).items()}
+            meta_str["chroma_collection"] = coll_name
+            candidates.append(
+                (
+                    score,
+                    RetrievedChunk(
+                        chunk_id=cid,
+                        text=doc or "",
+                        metadata=meta_str,
+                        similarity_score=float(score),
+                        dense_score=float(score),
+                        bm25_score=0.0,
+                    ),
+                )
+            )
+
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    out: list[RetrievedChunk] = []
+    seen_text: set[str] = set()
+    for _sc, ch in candidates:
+        sig = ch.text[:200]
+        if sig in seen_text:
+            continue
+        seen_text.add(sig)
+        out.append(ch)
+        if len(out) >= top_k:
             break
     return out

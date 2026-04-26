@@ -1,0 +1,10 @@
+{
+  "document_id": "test-dpia",
+  "source_url": "https://example.invalid/dpia",
+  "sections": [
+    {
+      "heading": "Test DPIA",
+      "text": "High-risk processing requires a data protection impact assessment under Article 35 GDPR."
+    }
+  ]
+}

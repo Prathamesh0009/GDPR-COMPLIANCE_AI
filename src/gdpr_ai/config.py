@@ -44,13 +44,33 @@ class Settings(BaseSettings):
     topic_demote_factor: float = Field(
         default=0.82,
         validation_alias="TOPIC_DEMOTE_FACTOR",
-        description="Dense-score multiplier for chunks with no topic-tag overlap when some overlap exists.",
+        description=(
+            "Dense-score multiplier for chunks with no topic-tag overlap "
+            "when some overlap exists."
+        ),
     )
     max_tokens: int = Field(default=8192, validation_alias="MAX_TOKENS")
     max_tokens_validate: int = Field(default=12288, validation_alias="MAX_TOKENS_VALIDATE")
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
 
     chroma_collection: str = Field(default="gdpr_ai_chunks", validation_alias="CHROMA_COLLECTION")
+
+    chroma_collection_dpia: str = Field(
+        default="dpia_guidance", validation_alias="CHROMA_COLLECTION_DPIA"
+    )
+    chroma_collection_ropa: str = Field(
+        default="ropa_templates", validation_alias="CHROMA_COLLECTION_ROPA"
+    )
+    chroma_collection_tom: str = Field(
+        default="tom_catalog", validation_alias="CHROMA_COLLECTION_TOM"
+    )
+    chroma_collection_consent: str = Field(
+        default="consent_guidance", validation_alias="CHROMA_COLLECTION_CONSENT"
+    )
+    chroma_collection_ai_act: str = Field(
+        default="ai_act",
+        validation_alias="CHROMA_COLLECTION_AI_ACT",
+    )
 
 
 settings = Settings()

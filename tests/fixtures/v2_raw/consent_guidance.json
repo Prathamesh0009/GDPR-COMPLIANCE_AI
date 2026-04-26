@@ -1,0 +1,10 @@
+{
+  "document_id": "test-consent",
+  "source_url": "https://example.invalid/consent",
+  "sections": [
+    {
+      "heading": "Test consent",
+      "text": "Consent must be freely given, specific, informed and unambiguous under Article 4(11) GDPR."
+    }
+  ]
+}

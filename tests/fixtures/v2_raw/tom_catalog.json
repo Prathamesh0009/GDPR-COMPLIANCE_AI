@@ -1,0 +1,12 @@
+{
+  "source_url": "https://example.invalid/tom",
+  "entries": [
+    {
+      "category": "test_encryption",
+      "gdpr_article": "Art. 32",
+      "description": "Use encryption for personal data at rest.",
+      "implementation_examples": ["Enable volume encryption"],
+      "publisher": "test"
+    }
+  ]
+}
