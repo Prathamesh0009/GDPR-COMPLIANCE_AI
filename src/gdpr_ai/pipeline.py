@@ -285,5 +285,6 @@ async def run_pipeline(scenario_text: str) -> AnalysisReport:
         estimated_cost_eur=total_cost,
         model_reasoning=settings.model_reasoning,
         query_id=query_id,
+        analysis_mode="violation_analysis",
     )
     return report

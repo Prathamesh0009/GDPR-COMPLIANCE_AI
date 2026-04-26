@@ -56,6 +56,7 @@ def ensure_query_log_schema(conn: sqlite3.Connection) -> None:
         ("input_tokens", "INTEGER"),
         ("output_tokens", "INTEGER"),
         ("model_reasoning", "TEXT"),
+        ("analysis_mode", "TEXT"),
     ):
         if col not in have:
             conn.execute(f"ALTER TABLE query_logs ADD COLUMN {col} {decl}")

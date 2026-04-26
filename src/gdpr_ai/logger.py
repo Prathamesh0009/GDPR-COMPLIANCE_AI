@@ -46,6 +46,7 @@ class QueryLogRecord:
     estimated_cost_eur: float
     model_reasoning: str | None
     feedback: str | None
+    analysis_mode: str | None
 
 
 def log_query(
@@ -71,6 +72,7 @@ def log_query(
     model_reasoning: str | None,
     feedback: str | None = None,
     query_id: str | None = None,
+    analysis_mode: str | None = None,
 ) -> str:
     """Insert a query log row and return its primary key."""
     qid = query_id or str(uuid.uuid4())
@@ -85,8 +87,8 @@ def log_query(
                 retrieved_chunks_count, retrieved_articles, report_json, violations_count, severity,
                 latency_total_ms, latency_extract_ms, latency_classify_ms, latency_retrieve_ms,
                 latency_reason_ms, latency_validate_ms, input_tokens, output_tokens, total_tokens,
-                estimated_cost_eur, model_reasoning, feedback
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                estimated_cost_eur, model_reasoning, feedback, analysis_mode
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 qid,
@@ -111,6 +113,7 @@ def log_query(
                 estimated_cost_eur,
                 model_reasoning,
                 feedback,
+                analysis_mode,
             ),
         )
         conn.commit()
@@ -162,6 +165,7 @@ def _row_to_record(row: sqlite3.Row) -> QueryLogRecord:
         estimated_cost_eur=float(d.get("estimated_cost_eur") or 0.0),
         model_reasoning=d.get("model_reasoning"),
         feedback=d.get("feedback"),
+        analysis_mode=d.get("analysis_mode"),
     )
 
 
