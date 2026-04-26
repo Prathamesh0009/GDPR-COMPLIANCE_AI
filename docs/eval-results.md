@@ -36,7 +36,7 @@ On the reference run above, **no scenario fell below F1 0.70** under the calibra
 
 ## Known retrieval gaps
 
-- **ePrivacy / cookies:** Scenario SC-018 flags a gap for the ePrivacy framework; the index focuses on GDPR + national implementations (e.g. TTDSG) and EDPB guidance, not the full ePrivacy Directive text.
+- **ePrivacy / cookies:** Scenario SC-V-018 flags a gap for the ePrivacy framework; the index focuses on GDPR + national implementations (e.g. TTDSG) and EDPB guidance, not the full ePrivacy Directive text.
 - **Thin index:** If Chroma is empty or stale, run `scripts/scrape_*.py`, `scripts/translate_sources.py`, and `scripts/chunk_and_embed.py` before eval.
 
 ## Improvement notes

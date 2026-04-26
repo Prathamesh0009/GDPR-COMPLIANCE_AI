@@ -124,10 +124,11 @@ Every chunk carries `source`, `source_url`, `license`, and related metadata for 
 
 ## Evaluation
 
-- **Violation gold set:** `gold/test_scenarios.yaml` (30 hand-written scenarios).
-- **Violation harness:** `uv run python tests/run_eval.py` (live API calls; use `--scenarios SC-001,SC-002` for a subset, `--yes` to skip the cost prompt).
-- **Compliance gold set:** `gold/compliance_scenarios.yaml` (20 system-description scenarios).
-- **Compliance harness:** `uv run python tests/run_compliance_eval.py` — use `--dry-run` to validate gold file and `DataMap` shape without API calls; live runs need `ANTHROPIC_API_KEY` and print cost estimates. Optional `--write-baseline` updates `gold/compliance_baseline.json`. Results are also written to `logs/compliance_eval_results.json` (gitignored).
+- **Unified gold set:** `gold/test_scenarios.yaml` — 30 `violation_analysis` scenarios (`SC-V-*`) and 20 `compliance_assessment` scenarios (`SC-C-*`), single schema with a `mode` field.
+- **Harness:** `uv run python tests/run_eval.py` — runs the correct pipeline per scenario; use `--dry-run` to validate YAML and compliance `DataMap` shape without API calls. Live runs need an API key in `.env` and print a rough cost estimate (`--yes` skips the confirmation prompt).
+- **Filters:** `--mode violation_analysis` / `compliance_assessment`, `--scenarios SC-V-001,SC-C-001`, `--difficulty easy|medium|hard`, `--category <label>`.
+- **Output / regression:** `--output path.json` writes a full `EvalReport`; `gold/baseline.json` stores aggregate targets; `--check-baseline` warns on >5 pp regression and exits 1 on >10 pp drops (per tracked metric).
+- **Replay (violation only):** `--replay path/to/eval.json` recomputes article metrics from saved `actual_keys` (legacy ids `SC-001` … are mapped to `SC-V-001` …).
 - **Reported metrics:** See [`docs/eval-results.md`](docs/eval-results.md) (update after each formal eval).
 
 ## Cost
@@ -135,15 +136,14 @@ Every chunk carries `source`, `source_url`, `license`, and related metadata for 
 Rough order of magnitude (depends on provider pricing and scenario length):
 
 - **Single analysis:** on the order of **€0.02–€0.08** for a typical scenario with the default models in `config`.
-- **Full violation gold eval (30 scenarios):** use the cost line printed by `tests/run_eval.py` before confirming.
-- **Full compliance gold eval (20 scenarios):** use the estimate from `tests/run_compliance_eval.py` (higher than a single `assess` because each scenario runs assessment plus template checks).
+- **Full unified gold eval (50 scenarios):** use the cost line printed by `tests/run_eval.py` before confirming (compliance rows run assessment plus document marker checks).
 
 ## Limitations
 
 - **Not legal advice** — Output is informational; a qualified professional must interpret it.
 - **English runtime** — User-facing text is English; German sources are translated at index time.
 - **Indexed law only** — If an article or statute is not in the database, the tool will not invent it; you may see “retrieval gap” notes instead.
-- **ePrivacy** — Cookie-only scenarios may be incomplete unless TTDSG / guidance chunks cover the fact pattern (see gold scenario SC-018).
+- **ePrivacy** — Cookie-only scenarios may be incomplete unless TTDSG / guidance chunks cover the fact pattern (see gold scenario SC-V-018).
 
 ## License
 

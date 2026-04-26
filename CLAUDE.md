@@ -42,8 +42,8 @@ See README.md for full context.
   - templates/ — Jinja2 markdown templates for v2 documents
   - cli.py — Typer entry point (`analyze`, `assess`, `serve`, stats/history, …)
   - logger.py / logging_schema.py — query log (includes `analysis_mode`: violation vs compliance)
-- gold/ — `test_scenarios.yaml` (v1), `compliance_scenarios.yaml` + `compliance_baseline.json` (v2)
-- tests/ — unit + integration + `run_eval.py` + `run_compliance_eval.py`
+- gold/ — `test_scenarios.yaml` (unified v1 + v2 scenarios), `baseline.json` (eval regression targets)
+- tests/ — unit + integration + `run_eval.py` (unified eval), `eval_models.py`, `eval_scoring.py`, `test_eval_harness.py`
 - data/ — raw scraped data, processed chunks, Chroma DB, optional `app.db` (gitignored)
 - docs/ — ADRs and design notes
 
@@ -91,10 +91,9 @@ Attribution for every chunk MUST be preserved in metadata (source, URL, license)
 
 - Unit tests for parsers, chunkers, validators
 - Integration tests for pipeline stages (mocked LLM responses)
-- Gold scenarios: `gold/test_scenarios.yaml` (v1 violations), `gold/compliance_scenarios.yaml` (v2 compliance)
-- `tests/run_eval.py` — v1 article-level precision/recall (live API)
-- `tests/run_compliance_eval.py` — v2 metrics (article overlap, finding-area coverage, document markers); `--dry-run` for no API
-- Every prompt/retrieval change must be measured against the v1 gold set; compliance prompt changes should be spot-checked on the v2 gold file
+- Gold scenarios: `gold/test_scenarios.yaml` — `mode: violation_analysis` (SC-V-*) and `compliance_assessment` (SC-C-*)
+- `tests/run_eval.py` — unified harness: article recall/precision, law recall (v1), finding coverage/accuracy and document markers (v2); `--dry-run`, `--check-baseline`, `--replay`
+- Every prompt/retrieval change should be measured on the full gold set or the relevant mode slice
 
 ## What to NOT do
 
