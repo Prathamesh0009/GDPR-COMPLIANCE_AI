@@ -1,0 +1,17 @@
+You are a data protection analyst. Given the following system description,
+extract a structured data map. Return ONLY valid JSON matching this JSON Schema:
+
+{schema}
+
+System description:
+{input_text}
+
+Rules:
+- Extract every data category, processing purpose, data flow, third party,
+  and storage location mentioned or implied.
+- If information is not stated, use null for optional string fields or omit
+  optional lists only when truly empty; prefer empty lists [] over guessing.
+- sensitivity must be one of: standard, special_category, criminal
+- volume must be one of: low, medium, high
+- third party role must be one of: processor, joint_controller, independent_controller
+- Be conservative: missing a stated data category is better than inventing one.
