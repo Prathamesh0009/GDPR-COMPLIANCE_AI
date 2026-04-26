@@ -1,0 +1,31 @@
+# Data Retention Policy
+## System: {{ assessment.system_name }}
+## Date: {{ generated_date }}
+
+> ⚠️ Automated draft from the tool. Legal review required.
+
+## Principle
+Personal data shall be kept for no longer than is necessary for the
+purposes for which it is processed (Article 5(1)(e) GDPR).
+
+## Retention Schedule
+
+| Data Category | Purpose | Retention Period | Deletion Method | Legal Basis |
+|--------------|---------|-----------------|-----------------|-------------|
+{% for cat in data_map.data_categories %}
+{% set storages = get_storage_for_category(cat) %}
+{% if storages %}
+{% for storage in storages %}
+| {{ cat.name }} | {{ get_purpose_for_category(cat) }} | {{ storage.retention_period or '⚠️ NOT DEFINED' }} | [TO BE SPECIFIED] | [TO BE SPECIFIED] |
+{% endfor %}
+{% else %}
+| {{ cat.name }} | {{ get_purpose_for_category(cat) or '⚠️ NOT SPECIFIED' }} | ⚠️ NOT DEFINED | [TO BE SPECIFIED] | [TO BE SPECIFIED] |
+{% endif %}
+{% endfor %}
+
+## Review Schedule
+This retention policy shall be reviewed at minimum annually or when:
+- New data categories are collected
+- Processing purposes change
+- Legal requirements change
+- Third-party processors change

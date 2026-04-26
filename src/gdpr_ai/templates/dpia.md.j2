@@ -1,0 +1,65 @@
+# Data Protection Impact Assessment
+## System: {{ assessment.system_name }}
+## Date: {{ generated_date }}
+
+> ⚠️ DISCLAIMER: This is an automated draft from the tool. It should be reviewed by a
+> qualified Data Protection Officer before use. This does not constitute legal advice.
+
+## 1. Description of Processing
+### 1.1 Nature of Processing
+{{ data_map.system_description }}
+
+### 1.2 Data Categories Processed
+{% for cat in data_map.data_categories %}
+- **{{ cat.name }}** ({{ cat.sensitivity.value }}) — subjects: {{ cat.subjects | join(', ') }}
+{% endfor %}
+
+### 1.3 Purpose of Processing
+{% for purpose in data_map.processing_purposes %}
+- **{{ purpose.purpose }}** — legal basis: {{ purpose.legal_basis_claimed or 'NOT SPECIFIED ⚠️' }}
+{% endfor %}
+
+### 1.4 Data Flows
+{% for flow in data_map.data_flows %}
+- {{ flow.source }} → {{ flow.destination }}{% if flow.crosses_border %} (CROSS-BORDER to {{ flow.destination_country or 'unknown' }}) ⚠️{% endif %}
+
+{% endfor %}
+
+## 2. Necessity and Proportionality Assessment
+{% for finding in findings_by_area('data_minimization') %}
+{{ finding.description }}
+
+{% else %}
+_No specific data minimization findings were recorded under this label._
+{% endfor %}
+
+## 3. Risk Assessment
+### 3.1 Risks to Data Subjects
+{% for finding in high_risk_findings %}
+#### {{ finding.area }}
+- **Status:** {{ finding.status.value }}
+- **Relevant Articles:** {{ finding.relevant_articles | join(', ') }}
+- **Risk:** {{ finding.description }}
+
+{% else %}
+_No high-risk findings (non-compliant / at risk) were listed._
+{% endfor %}
+
+## 4. Mitigation Measures
+{% for finding in findings_with_remediation %}
+### {{ finding.area }}
+{{ finding.remediation }}
+{% if finding.technical_guidance %}
+
+**Technical Implementation:**
+{{ finding.technical_guidance }}
+{% endif %}
+
+{% else %}
+_No remediation items were provided in the assessment._
+{% endfor %}
+
+## 5. Conclusion
+Overall risk level: **{{ assessment.overall_risk_level | upper }}**
+
+{{ assessment.summary }}

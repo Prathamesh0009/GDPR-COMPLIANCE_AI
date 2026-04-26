@@ -1,0 +1,41 @@
+# Records of Processing Activities (Article 30 GDPR)
+## Controller: [ORGANIZATION NAME]
+## System: {{ assessment.system_name }}
+## Date: {{ generated_date }}
+
+> ⚠️ DISCLAIMER: Automated draft from the tool. Review by DPO required.
+
+| Field | Value |
+|-------|-------|
+| Name of Controller | [TO BE FILLED] |
+| Contact Details | [TO BE FILLED] |
+| DPO Contact | [TO BE FILLED] |
+| Joint Controller (if any) | [TO BE FILLED] |
+
+## Processing Activities
+
+{% for purpose in data_map.processing_purposes %}
+### Activity: {{ purpose.purpose }}
+
+| Field | Value |
+|-------|-------|
+| Purpose | {{ purpose.purpose }} |
+| Legal Basis | {{ purpose.legal_basis_claimed or '⚠️ NOT SPECIFIED' }} |
+| Categories of Data Subjects | {{ get_subjects_for_purpose(purpose) | join(', ') }} |
+| Categories of Personal Data | {{ purpose.data_categories | join(', ') }} |
+| Recipients | {{ get_recipients_for_purpose(purpose) | join(', ') or 'None identified' }} |
+| Transfers to Third Countries | {{ get_transfers_for_purpose(purpose) or 'None' }} |
+| Retention Period | {{ get_retention_for_purpose(purpose) or '⚠️ NOT SPECIFIED' }} |
+| Technical & Organisational Measures | See TOM section below |
+
+{% endfor %}
+
+## Technical and Organisational Measures (Article 32)
+
+{% for finding in findings_by_area('security') %}
+- {{ finding.description }}
+  {% if finding.remediation %}Recommendation: {{ finding.remediation }}{% endif %}
+
+{% else %}
+_No security-labelled findings were recorded; complete Article 32 measures separately._
+{% endfor %}
