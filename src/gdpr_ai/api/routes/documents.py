@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
-from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from gdpr_ai.api.deps import get_repository
 from gdpr_ai.api.schemas import (
     COMPLIANCE_DOC_TYPES,
     DocumentGenerateRequest,
@@ -16,20 +15,17 @@ from gdpr_ai.api.schemas import (
 )
 from gdpr_ai.compliance.generator import generate_documents
 from gdpr_ai.compliance.schemas import ComplianceAssessment
+from gdpr_ai.db.repository import AppRepository
 from gdpr_ai.logger import get_query
 
 router = APIRouter()
 
-_DOC_INDEX: dict[str, dict[str, Any]] = {}
-
-
-def reset_document_store_for_tests() -> None:
-    """Clear generated document metadata (tests only)."""
-    _DOC_INDEX.clear()
-
 
 @router.post("/documents/generate", response_model=DocumentGenerateResponse)
-def generate_documents_route(body: DocumentGenerateRequest) -> DocumentGenerateResponse:
+async def generate_documents_route(
+    body: DocumentGenerateRequest,
+    repo: AppRepository = Depends(get_repository),
+) -> DocumentGenerateResponse:
     """Render markdown documents from a stored compliance assessment."""
     rec = get_query(body.analysis_id)
     if not rec or not rec.report_json:
@@ -61,31 +57,40 @@ def generate_documents_route(body: DocumentGenerateRequest) -> DocumentGenerateR
         raise HTTPException(status_code=400, detail="No documents to render")
 
     out: list[GeneratedDocument] = []
-    ts = datetime.now(tz=UTC).isoformat()
     for key in sorted(to_render):
         doc_id = str(uuid.uuid4())
         content = all_docs[key]
-        _DOC_INDEX[doc_id] = {
-            "analysis_id": body.analysis_id,
-            "doc_type": key,
-            "content": content,
-            "created_at": ts,
-        }
-        out.append(GeneratedDocument(document_id=doc_id, doc_type=key, content=content))
+        await repo.create_document(
+            document_id=doc_id,
+            analysis_id=body.analysis_id,
+            doc_type=key,
+            content=content,
+            format="markdown",
+        )
+        out.append(
+            GeneratedDocument(
+                document_id=doc_id,
+                doc_type=key,
+                content=content,
+            )
+        )
     return DocumentGenerateResponse(analysis_id=body.analysis_id, documents=out)
 
 
 @router.get("/documents/{document_id}", response_model=DocumentGetResponse)
-def get_document(document_id: str) -> DocumentGetResponse:
+async def get_document(
+    document_id: str,
+    repo: AppRepository = Depends(get_repository),
+) -> DocumentGetResponse:
     """Return a previously generated document."""
-    meta = _DOC_INDEX.get(document_id)
+    meta = await repo.get_document(document_id)
     if not meta:
         raise HTTPException(status_code=404, detail="Document not found")
     return DocumentGetResponse(
-        document_id=document_id,
-        analysis_id=str(meta["analysis_id"]),
-        doc_type=str(meta["doc_type"]),
-        content=str(meta["content"]),
-        format="markdown",
-        created_at=meta.get("created_at"),
+        document_id=meta.id,
+        analysis_id=meta.analysis_id,
+        doc_type=meta.doc_type,
+        content=meta.content,
+        format=meta.format,
+        created_at=meta.created_at,
     )

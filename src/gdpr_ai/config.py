@@ -20,6 +20,11 @@ class Settings(BaseSettings):
         default=Path("./logs/gdpr_ai.db"),
         validation_alias="LOG_DB_PATH",
     )
+    sqlite_path: Path = Field(
+        default=Path("./data/app.db"),
+        validation_alias="SQLITE_PATH",
+        description="SQLite database for projects, analyses, and generated documents.",
+    )
     bm25_index_path: Path = Field(
         default=Path("./data/processed/bm25.pkl"),
         validation_alias="BM25_INDEX_PATH",

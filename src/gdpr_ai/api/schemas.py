@@ -17,6 +17,10 @@ class ViolationAnalyzeRequest(BaseModel):
     """Body for violation (v1) analysis."""
 
     scenario: str = Field(..., min_length=10, max_length=8000)
+    project_id: str | None = Field(
+        None,
+        description="Project to attach this run to (defaults to the built-in Default project).",
+    )
 
 
 class ComplianceAnalyzeRequest(BaseModel):
@@ -24,6 +28,10 @@ class ComplianceAnalyzeRequest(BaseModel):
 
     system_description: str | None = Field(None, max_length=32000)
     data_map: dict[str, Any] | None = None
+    project_id: str | None = Field(
+        None,
+        description="Project to attach this run to (defaults to the built-in Default project).",
+    )
 
     @model_validator(mode="after")
     def one_input_shape(self) -> ComplianceAnalyzeRequest:

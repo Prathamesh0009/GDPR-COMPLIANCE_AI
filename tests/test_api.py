@@ -1,14 +1,14 @@
 """HTTP API tests (FastAPI TestClient)."""
 from __future__ import annotations
 
+import asyncio
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 from gdpr_ai.api.app import app
-from gdpr_ai.api.routes.documents import reset_document_store_for_tests
-from gdpr_ai.api.routes.projects import reset_project_store_for_tests
 from gdpr_ai.compliance.schemas import (
     ComplianceAssessment,
     ComplianceStatus,
@@ -19,22 +19,22 @@ from gdpr_ai.compliance.schemas import (
     Sensitivity,
     Volume,
 )
+from gdpr_ai.db.database import DEFAULT_PROJECT_ID
+from gdpr_ai.db.repository import AppRepository
 from gdpr_ai.logger import QueryLogRecord
 from gdpr_ai.models import AnalysisReport, ClassifiedTopics, ExtractedEntities
 
 
 @pytest.fixture
-def client() -> TestClient:
-    return TestClient(app)
+def app_db_path(tmp_path: Path) -> Path:
+    return tmp_path / "api.sqlite"
 
 
-@pytest.fixture(autouse=True)
-def _clean_stores() -> None:
-    reset_document_store_for_tests()
-    reset_project_store_for_tests()
-    yield
-    reset_document_store_for_tests()
-    reset_project_store_for_tests()
+@pytest.fixture
+def client(monkeypatch: pytest.MonkeyPatch, app_db_path: Path) -> TestClient:
+    monkeypatch.setattr("gdpr_ai.config.settings.sqlite_path", app_db_path)
+    with TestClient(app) as tc:
+        yield tc
 
 
 def _minimal_report() -> AnalysisReport:
@@ -181,8 +181,22 @@ def test_get_analysis_mocked(client: TestClient) -> None:
     assert r.json()["analysis_id"] == "abc"
 
 
-def test_documents_generate_mocked(client: TestClient) -> None:
+async def _seed_compliance_analysis(db_path: Path, assessment: ComplianceAssessment) -> None:
+    repo = AppRepository(db_path)
+    await repo.create_analysis(
+        analysis_id="doc-run",
+        project_id=DEFAULT_PROJECT_ID,
+        mode="compliance_assessment",
+        input_text="x",
+        result=assessment.model_dump(),
+        llm_cost_usd=0.0,
+        duration_seconds=0.0,
+    )
+
+
+def test_documents_generate_mocked(client: TestClient, app_db_path: Path) -> None:
     assessment = _minimal_assessment()
+    asyncio.run(_seed_compliance_analysis(app_db_path, assessment))
     rec = QueryLogRecord(
         id="doc-run",
         timestamp="2026-01-01T00:00:00+00:00",
