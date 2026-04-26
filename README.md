@@ -10,15 +10,50 @@ It does **not** provide legal advice; it assists analysis and documentation.
 
 ## Quick demo
 
+**Violation analysis (v1)** — scenario describes a possible breach:
+
 ```bash
 uv run gdpr-check analyze "A company emails marketing without consent."
 ```
 
-Typical output includes a severity assessment, a table of articles with confidence and source links, and optional “not grounded” notes when something seems relevant but no chunk supported it. See [`docs/sample-output.md`](docs/sample-output.md) for a trimmed example.
+**Compliance assessment (v2)** — you describe *your* system; the tool returns a structured assessment plus optional document drafts (DPIA, RoPA, checklist, consent flow, retention):
+
+```bash
+uv run gdpr-check assess "We run a B2B SaaS in Frankfurt; we store emails in Postgres EU and use a US email vendor as processor."
+```
+
+**Local HTTP API** (same engines as the CLI):
+
+```bash
+uv run gdpr-check serve
+# then e.g. curl http://127.0.0.1:8000/health
+```
+
+Typical v1 output includes a severity assessment, a table of articles with confidence and source links, and optional “not grounded” notes when something seems relevant but no chunk supported it. See [`docs/sample-output.md`](docs/sample-output.md) for a trimmed example.
 
 ## Architecture
 
 High-level flow (extract → classify → retrieve → reason → validate) and the knowledge-base build path are in [`docs/architecture.md`](docs/architecture.md).
+
+### v2 compliance mode (summary)
+
+1. **Intake** — Free text or JSON `DataMap` → normalized `DataMap` (language model for prose).
+2. **Map** — Hybrid retrieval over the main GDPR collection plus v2 collections (DPIA, RoPA, TOM, consent guidance, AI Act) where configured.
+3. **Assess** — Language model produces `ComplianceAssessment` (findings, articles); citations are filtered like v1.
+4. **Documents** — Jinja2 templates render markdown (DPIA, RoPA, checklist, consent flow, retention policy).
+5. **API / persistence** — FastAPI routes under `/api/v1`; projects, analyses, and generated documents live in `SQLITE_PATH` (default `data/app.db`). Query telemetry remains in `LOG_DB_PATH` (default `logs/gdpr_ai.db`).
+
+Example requests (with the server listening on port 8000):
+
+```bash
+curl -s http://127.0.0.1:8000/health
+curl -s -X POST http://127.0.0.1:8000/api/v1/analyze/violation \
+  -H "Content-Type: application/json" \
+  -d '{"scenario": "A company sends marketing emails without consent"}'
+curl -s -X POST http://127.0.0.1:8000/api/v1/analyze/compliance \
+  -H "Content-Type: application/json" \
+  -d '{"system_description": "Newsletter SaaS storing emails in the EU with a US processor."}'
+```
 
 ## Getting started
 
@@ -89,8 +124,10 @@ Every chunk carries `source`, `source_url`, `license`, and related metadata for 
 
 ## Evaluation
 
-- **Gold set:** `gold/test_scenarios.yaml` (30 hand-written scenarios).
-- **Harness:** `uv run python tests/run_eval.py` (live API calls; use `--scenarios SC-001,SC-002` for a subset, `--yes` to skip the cost prompt).
+- **Violation gold set:** `gold/test_scenarios.yaml` (30 hand-written scenarios).
+- **Violation harness:** `uv run python tests/run_eval.py` (live API calls; use `--scenarios SC-001,SC-002` for a subset, `--yes` to skip the cost prompt).
+- **Compliance gold set:** `gold/compliance_scenarios.yaml` (20 system-description scenarios).
+- **Compliance harness:** `uv run python tests/run_compliance_eval.py` — use `--dry-run` to validate gold file and `DataMap` shape without API calls; live runs need `ANTHROPIC_API_KEY` and print cost estimates. Optional `--write-baseline` updates `gold/compliance_baseline.json`. Results are also written to `logs/compliance_eval_results.json` (gitignored).
 - **Reported metrics:** See [`docs/eval-results.md`](docs/eval-results.md) (update after each formal eval).
 
 ## Cost
@@ -98,7 +135,8 @@ Every chunk carries `source`, `source_url`, `license`, and related metadata for 
 Rough order of magnitude (depends on provider pricing and scenario length):
 
 - **Single analysis:** on the order of **€0.02–€0.08** for a typical scenario with the default models in `config`.
-- **Full gold eval (30 scenarios):** use the cost line printed by `tests/run_eval.py` before confirming.
+- **Full violation gold eval (30 scenarios):** use the cost line printed by `tests/run_eval.py` before confirming.
+- **Full compliance gold eval (20 scenarios):** use the estimate from `tests/run_compliance_eval.py` (higher than a single `assess` because each scenario runs assessment plus template checks).
 
 ## Limitations
 
