@@ -6,6 +6,7 @@ import AnimatedOutlet from '@/components/layout/AnimatedOutlet'
 import Header from '@/components/layout/Header'
 import Sidebar from '@/components/layout/Sidebar'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { ToastProvider } from '@/context/ToastContext'
 import AnalyzePage from '@/pages/AnalyzePage'
 import HistoryPage from '@/pages/HistoryPage'
 import SettingsPage from '@/pages/SettingsPage'
@@ -51,9 +52,11 @@ function AppShell() {
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <AppShell />
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </ToastProvider>
     </ThemeProvider>
   )
 }

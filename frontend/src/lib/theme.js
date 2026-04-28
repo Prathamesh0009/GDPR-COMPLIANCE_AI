@@ -2,7 +2,7 @@
 export const severityConfig = {
   low: { label: 'Low', color: 'text-emerald-400', bg: 'bg-emerald-500/10', pulse: false },
   medium: { label: 'Medium', color: 'text-amber-500', bg: 'bg-amber-500/10', pulse: false },
-  high: { label: 'High', color: 'text-orange-500', bg: 'bg-orange-500/10', pulse: false },
+  high: { label: 'High', color: 'text-orange-500', bg: 'bg-orange-500/10', pulse: true },
   critical: { label: 'Critical', color: 'text-rose-500', bg: 'bg-rose-500/15', pulse: true },
   unknown: { label: 'Unknown', color: 'text-slate-500', bg: 'bg-slate-500/10', pulse: false },
 }

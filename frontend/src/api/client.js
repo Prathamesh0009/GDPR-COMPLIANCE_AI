@@ -24,6 +24,28 @@ function formatDetail(detail) {
   return 'Something went wrong'
 }
 
+/**
+ * User-facing message from an axios/reject error.
+ * @param {unknown} error
+ * @returns {string}
+ */
+export function getErrorMessage(error) {
+  if (axios.isAxiosError(error)) {
+    if (error.code === 'ECONNABORTED') {
+      return 'Analysis timed out. Try a shorter scenario or check if the backend is running.'
+    }
+    if (error.code === 'ERR_NETWORK' || !error.response) {
+      return 'Cannot connect to the backend. Make sure `gdpr-check serve` is running on port 8000.'
+    }
+    const detail = error.response?.data?.detail
+    const formatted = formatDetail(detail)
+    if (formatted) return formatted
+    return error.message || 'Analysis failed'
+  }
+  if (error instanceof Error) return error.message
+  return 'Analysis failed'
+}
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -36,25 +58,22 @@ api.interceptors.response.use(
 
 export default api
 
-/** @returns {Promise<import('axios').AxiosResponse<{ status: string; version: string }>>} */
 export const healthCheck = () => api.get('/health')
 
-/**
- * @param {string} scenario
- * @param {string} [projectId]
- */
 export const analyzeViolation = (scenario, projectId) =>
   api.post('/api/v1/analyze/violation', {
     scenario,
     ...(projectId ? { project_id: projectId } : {}),
   })
 
-/**
- * @param {string} systemDescription
- * @param {string} [projectId]
- */
 export const analyzeCompliance = (systemDescription, projectId) =>
   api.post('/api/v1/analyze/compliance', {
     system_description: systemDescription,
     ...(projectId ? { project_id: projectId } : {}),
   })
+
+export const getHistory = (params = {}) => api.get('/api/v1/history', { params })
+
+export const getAnalysisDetail = (id) => api.get(`/api/v1/history/${id}`)
+
+export const getStats = () => api.get('/api/v1/stats')
