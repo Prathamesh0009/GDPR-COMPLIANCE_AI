@@ -82,7 +82,7 @@ Delivery plan for the **local-only** React SPA (Vite + Tailwind + shadcn/ui) des
 ## Dependency notes
 
 - Backend work tracked explicitly in [v3-api-integration.md](v3-api-integration.md) (**stats** + **analysis list** endpoints) can parallelize after Milestone 2.
-- **v4** features (multilingual, uploads, scanning) **extend** this UI; avoid hard-coding copy-only flows that block i18n hooks added in v4.
+- **v4** features (**retrieval gap** dashboard/API, multilingual, uploads, scanning) **extend** this UI; avoid hard-coding copy-only flows that block i18n hooks added in v4. See [v4-overview.md](v4-overview.md).
 
 ---
 

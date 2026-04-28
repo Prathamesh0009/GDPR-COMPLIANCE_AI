@@ -14,7 +14,7 @@ This document scopes the **v3 web frontend** for GDPR AI: a local-first React SP
 | **Dev URLs** | Vite dev server: **`http://localhost:5173`**. API: **`http://localhost:8000`** (existing `gdpr-check serve` / uvicorn). |
 | **Networking** | Prefer **Vite proxy** for `/api/*` and `/health` → `localhost:8000` to avoid CORS friction during development (see [v3-api-integration.md](v3-api-integration.md)). |
 | **Tenancy** | **Single-user**: one operator on one machine. No multi-tenant isolation, no hosted auth service in v3. |
-| **Relationship to v4** | When **v4** (multilingual, uploads, scanning, public product) ships, this frontend is expected to **deploy alongside** those capabilities; v3 establishes patterns (design system, API client, charts) that v4 extends. |
+| **Relationship to v4** | When **v4** ships — **retrieval gap tracker** (dashboard/API), **multilingual** retrieval, **document upload**, **website scanning**, and hosted/product hardening — this frontend is expected to **deploy alongside** those capabilities; v3 establishes patterns (design system, API client, charts) that v4 extends. See [v4-overview.md](v4-overview.md). |
 
 ---
 
@@ -97,4 +97,5 @@ Frontend code will live in a **separate top-level directory** (e.g. `frontend/`)
 - [v3-component-tree.md](v3-component-tree.md)
 - [v3-api-integration.md](v3-api-integration.md)
 - [v3-roadmap.md](v3-roadmap.md)
+- [v4-overview.md](v4-overview.md) (next product phase)
 - Existing backend: `src/gdpr_ai/api/`, `src/gdpr_ai/models.py`, `src/gdpr_ai/compliance/schemas.py`

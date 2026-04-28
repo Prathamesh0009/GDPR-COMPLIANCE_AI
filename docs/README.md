@@ -11,7 +11,7 @@ Every document in this folder is version-controlled and updated in lockstep with
 | **v1** | Violation analysis CLI — scenario in, grounded violation report out (**shipped**). |
 | **v2** | Compliance assessment (**intake → map → assess → generate**), local **REST API**, SQLite persistence, document generation, unified **eval** framework, JSON/output hardening, **stats** / **history** (**shipped**). |
 | **v3** | **Web UI** (React dashboard), authentication, rate limiting, feedback capture, PDF export, in-browser reports (**planned**). |
-| **v4** | German-first **multilingual** retrieval and UI strategy, document upload, website scanning, KB refresh at service scale, ToS/privacy, optional commercial licensing (**planned**). |
+| **v4** | **Retrieval Gap Tracker** (closed-loop KB improvement), German-first **multilingual** retrieval, **document upload**, **website scanning**, KB refresh at service scale, ToS/privacy, optional commercial licensing (**planned**). See [v4-overview.md](v4-overview.md). |
 
 ## v2 Scope
 
@@ -27,6 +27,14 @@ Implementation-agnostic specs for the **React + Vite** dashboard (v3): overview,
 * [v3-component-tree.md](v3-component-tree.md)
 * [v3-api-integration.md](v3-api-integration.md)
 * [v3-roadmap.md](v3-roadmap.md)
+
+## V4 — Product planning
+
+Prioritised features: **retrieval gap tracker**, **multilingual retrieval**, **document upload**, **website scanning**.
+
+* [v4-overview.md](v4-overview.md) — rationale, scope, dependencies
+* [v4-gap-tracker.md](v4-gap-tracker.md) — schema, CLI/API, ingestion, metrics
+* [v4-roadmap.md](v4-roadmap.md) — milestones
 
 ## Phase 0 – Overview
 
