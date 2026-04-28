@@ -1,17 +1,18 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { severityConfig } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 
 /**
- * Violation severity or compliance risk level pill with optional pulse.
+ * Violation severity or compliance risk level pill with optional pulse (critical only).
  * @param {{ level: string, className?: string }} props
  */
 export default function SeverityBadge({ level, className }) {
   const key = String(level || 'unknown').toLowerCase()
   const conf = severityConfig[key] ?? severityConfig.unknown
   const reduceMotion = useReducedMotion()
-  const pulse = conf.pulse && !reduceMotion
+  const pulse = key === 'critical' && conf.pulse && !reduceMotion
 
   const inner = (
     <span
@@ -21,6 +22,7 @@ export default function SeverityBadge({ level, className }) {
         conf.color,
         className
       )}
+      aria-label={`Severity: ${conf.label}`}
     >
       {conf.label}
     </span>
@@ -30,8 +32,8 @@ export default function SeverityBadge({ level, className }) {
 
   return (
     <motion.span
-      animate={{ opacity: [0.7, 1], scale: [0.97, 1] }}
-      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      animate={{ opacity: [0.7, 1], scale: [0.98, 1] }}
+      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
       className="inline-flex"
     >
       {inner}

@@ -1,4 +1,6 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 import ComplianceReport from '@/components/results/ComplianceReport'
 import ViolationReport from '@/components/results/ViolationReport'

@@ -1,6 +1,7 @@
-import { animate, useReducedMotion } from 'framer-motion'
+import { animate } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
 
 /**

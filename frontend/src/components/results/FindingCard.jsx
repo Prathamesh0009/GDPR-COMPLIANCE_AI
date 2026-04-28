@@ -1,7 +1,9 @@
 import * as Collapsible from '@radix-ui/react-collapsible'
 import { ChevronDown } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
-import { useState } from 'react'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useEffect, useState } from 'react'
 
 import ArticleTag from '@/components/results/ArticleTag'
 import StatusBadge from '@/components/results/StatusBadge'
@@ -17,6 +19,15 @@ export default function FindingCard({ finding, index }) {
   const articles = finding.relevant_articles || []
   const visible = articles.slice(0, 3)
   const more = articles.length - visible.length
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
 
   return (
     <motion.div

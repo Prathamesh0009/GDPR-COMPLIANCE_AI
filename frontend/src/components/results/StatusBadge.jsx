@@ -21,6 +21,7 @@ export default function StatusBadge({ status, className }) {
         conf.color,
         className
       )}
+      aria-label={`Finding status: ${conf.label}`}
     >
       {conf.label}
     </span>

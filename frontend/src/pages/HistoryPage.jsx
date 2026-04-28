@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import HistoryFilters from '@/components/history/HistoryFilters'
@@ -23,6 +23,16 @@ export default function HistoryPage() {
   const toggleRow = useCallback((id) => {
     setExpandedId((cur) => (cur === id ? null : id))
   }, [])
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape' && expandedId) {
+        setExpandedId(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [expandedId])
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

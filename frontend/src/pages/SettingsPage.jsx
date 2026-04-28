@@ -1,70 +1,190 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import { healthCheck } from '@/api/client'
+import { Activity, Moon, Sun } from 'lucide-react'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+
+import { getStats, healthCheck } from '@/api/client'
 import Card from '@/components/shared/Card'
+import Skeleton from '@/components/shared/Skeleton'
+import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
-import { APP_NAME, APP_VERSION } from '@/lib/constants'
 import { useTheme } from '@/context/ThemeContext'
+import {
+  APP_NAME,
+  APP_VERSION,
+  AUTHOR_NAME,
+  BACKEND_URL_DISPLAY,
+  DEFAULT_APP_DB_PATH,
+  GITHUB_REPO_URL,
+} from '@/lib/constants'
 
 /**
- * Configuration and about.
+ * Theme, connection, data summary, and about.
  */
 export default function SettingsPage() {
   const { isDark, setIsDark } = useTheme()
-  const [apiKey, setApiKey] = useState('')
+  const reduceMotionFramer = useReducedMotion()
   const [health, setHealth] = useState(null)
+  const [healthLoading, setHealthLoading] = useState(true)
+  const [totalQueries, setTotalQueries] = useState(null)
+  const [statsLoading, setStatsLoading] = useState(true)
 
-  const probeHealth = () => {
+  const probeHealth = useCallback(() => {
+    setHealthLoading(true)
     healthCheck()
       .then((r) => setHealth({ ok: true, ...r.data }))
       .catch(() => setHealth({ ok: false }))
-  }
+      .finally(() => setHealthLoading(false))
+  }, [])
+
+  const loadStats = useCallback(() => {
+    setStatsLoading(true)
+    getStats()
+      .then((r) => setTotalQueries(Number(r.data?.total_queries ?? 0)))
+      .catch(() => setTotalQueries(null))
+      .finally(() => setStatsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      probeHealth()
+      loadStats()
+    }, 0)
+    return () => window.clearTimeout(id)
+  }, [probeHealth, loadStats])
+
+  const cardMotion = (i) => ({
+    initial: reduceMotionFramer ? false : { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: reduceMotionFramer ? 0 : 0.35, delay: reduceMotionFramer ? 0 : i * 0.08 },
+  })
+
+  const showSkeleton = healthLoading || statsLoading
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <Card>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">Anthropic API key</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          Local runs use the key from the FastAPI server <span className="font-mono">.env</span> (
-          <span className="font-mono">ANTHROPIC_API_KEY</span>). This field is optional placeholder UI for
-          future BYOK flows.
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-50">Settings</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          Appearance, API connectivity, and product information.
         </p>
-        <input
-          type="password"
-          autoComplete="off"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          placeholder="Not sent to the server in v3 M1"
-          className="mt-4 w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm text-slate-900 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-100"
-        />
-      </Card>
+      </div>
 
-      <Card>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">Appearance</h2>
-        <div className="mt-4 flex items-center gap-3">
-          <span className="text-sm text-slate-600 dark:text-slate-400">Dark mode</span>
-          <Switch checked={isDark} onCheckedChange={setIsDark} aria-label="Dark mode" />
+      {showSkeleton ? (
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-40 w-full" />
+          ))}
         </div>
-      </Card>
+      ) : (
+        <>
+          <motion.section {...cardMotion(0)}>
+            <Card className="border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-50">Appearance</h2>
+              <div className="flex flex-wrap items-center gap-4">
+                <Sun className="h-5 w-5 text-amber-500" aria-hidden />
+                <Switch
+                  checked={isDark}
+                  onCheckedChange={setIsDark}
+                  aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                />
+                <Moon className="h-5 w-5 text-slate-400" aria-hidden />
+                <span className="text-sm text-slate-600 dark:text-slate-400">
+                  {isDark ? 'Dark theme' : 'Light theme'}
+                </span>
+              </div>
+            </Card>
+          </motion.section>
 
-      <Card>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">About</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          {APP_NAME} — UI {APP_VERSION} (Milestone 1 scaffold)
-        </p>
-        <button
-          type="button"
-          onClick={probeHealth}
-          className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-        >
-          Check API health
-        </button>
-        {health ? (
-          <p className="mt-2 font-mono text-xs text-slate-500 dark:text-slate-500">
-            {health.ok ? `status=${health.status} version=${health.version}` : 'unreachable'}
-          </p>
-        ) : null}
-      </Card>
+          <motion.section {...cardMotion(1)}>
+            <Card className="border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-50">Connection</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Backend URL:{' '}
+                <span className="font-mono text-slate-800 dark:text-slate-200">{BACKEND_URL_DISPLAY}</span>
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {healthLoading ? (
+                  <span className="text-sm text-slate-500">Checking…</span>
+                ) : health?.ok ? (
+                  <>
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                    <span className="text-sm font-medium text-emerald-600 dark:text-emerald-500">
+                      Connected
+                      {health.version ? ` (v${health.version})` : ''}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="inline-block h-2 w-2 rounded-full bg-rose-500" aria-hidden />
+                    <span className="text-sm font-medium text-rose-600 dark:text-rose-500">
+                      Disconnected
+                    </span>
+                  </>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                className="mt-4"
+                onClick={() => probeHealth()}
+                disabled={healthLoading}
+              >
+                Test connection
+              </Button>
+            </Card>
+          </motion.section>
+
+          <motion.section {...cardMotion(2)}>
+            <Card className="border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-50">Data</h2>
+              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                <li className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
+                  Total analyses (query log):{' '}
+                  <span className="font-mono text-slate-900 dark:text-slate-200">
+                    {statsLoading ? '…' : totalQueries ?? '—'}
+                  </span>
+                </li>
+                <li>
+                  Database:{' '}
+                  <span className="font-mono text-slate-800 dark:text-slate-200">{DEFAULT_APP_DB_PATH}</span>{' '}
+                  <span className="text-slate-500">(default path; local SQLite)</span>
+                </li>
+              </ul>
+            </Card>
+          </motion.section>
+
+          <motion.section {...cardMotion(3)}>
+            <Card className="border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-50">About</h2>
+              <p className="text-sm text-slate-700 dark:text-slate-300">
+                {APP_NAME} UI v{APP_VERSION}
+              </p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                Backend version is shown when connected (from{' '}
+                <span className="font-mono">/health</span>).
+              </p>
+              <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+                Built by {AUTHOR_NAME}.{' '}
+                <a
+                  href={GITHUB_REPO_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                >
+                  {GITHUB_REPO_URL.replace('https://', '')}
+                </a>
+              </p>
+              <p className="mt-6 text-xs italic text-slate-500 dark:text-slate-500">
+                Informational only; not legal advice.
+              </p>
+            </Card>
+          </motion.section>
+        </>
+      )}
     </div>
   )
 }

@@ -1,6 +1,9 @@
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Fragment, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import HistoryDetail from '@/components/history/HistoryDetail'
 import SeverityBadge from '@/components/results/SeverityBadge'
@@ -129,8 +132,16 @@ export default function HistoryTable({
     return (
       <EmptyState
         title="No analyses found"
-        description="Try adjusting your filters or run your first analysis from the Analyze page."
+        description="Try adjusting your filters or run your first analysis."
         className="border-slate-200 dark:border-slate-800"
+        action={
+          <Link
+            to="/"
+            className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+          >
+            Go to Analyze →
+          </Link>
+        }
       />
     )
   }
@@ -190,7 +201,7 @@ export default function HistoryTable({
                   />
                 </button>
               </th>
-              <th className="w-24 px-4 py-3">
+              <th className="hidden w-24 px-4 py-3 lg:table-cell">
                 <button
                   type="button"
                   onClick={() => toggleSort('cost_eur')}
@@ -203,7 +214,7 @@ export default function HistoryTable({
                   />
                 </button>
               </th>
-              <th className="w-24 px-4 py-3">
+              <th className="hidden w-24 px-4 py-3 lg:table-cell">
                 <button
                   type="button"
                   onClick={() => toggleSort('latency_ms')}
@@ -224,10 +235,17 @@ export default function HistoryTable({
               return (
                 <Fragment key={row.id}>
                   <motion.tr
+                    tabIndex={0}
                     initial={reduceMotion ? false : { opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: reduceMotion ? 0 : index * 0.03, duration: 0.2 }}
                     onClick={() => onToggleRow(row.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onToggleRow(row.id)
+                      }
+                    }}
                     className={cn(
                       'cursor-pointer border-b border-slate-200 transition-colors hover:bg-slate-100/80 dark:border-slate-800/50 dark:hover:bg-slate-800/30',
                       isOpen && 'bg-slate-50 dark:bg-slate-800/20'
@@ -250,16 +268,16 @@ export default function HistoryTable({
                         {modeLabel(row.mode)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-800 dark:text-slate-200">
+                    <td className="max-w-[10rem] truncate px-4 py-3 text-sm text-slate-800 dark:text-slate-200 sm:max-w-[14rem] lg:max-w-none lg:whitespace-normal">
                       {truncate(row.scenario_system_description || '', 100)}
                     </td>
                     <td className="px-4 py-3">
                       <SeverityBadge level={row.severity || 'unknown'} />
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">
+                    <td className="hidden px-4 py-3 font-mono text-xs text-slate-500 lg:table-cell dark:text-slate-400">
                       {formatCost(row.cost_eur)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">
+                    <td className="hidden px-4 py-3 font-mono text-xs text-slate-500 lg:table-cell dark:text-slate-400">
                       {formatLatency(row.latency_ms)}
                     </td>
                   </motion.tr>

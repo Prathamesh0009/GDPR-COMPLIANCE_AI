@@ -1,37 +1,41 @@
-/* eslint-disable react-refresh/only-export-components -- paired Provider + useTheme hook */
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from 'react'
 
 const STORAGE_KEY = 'gdpr-ai-theme'
 
 const ThemeContext = createContext(
-  /** @type {{ isDark: boolean, setIsDark: (v: boolean) => void, toggleTheme: () => void }} */ ({
+  /** @type {{ theme: string, setTheme: (t: string) => void, toggleTheme: () => void, isDark: boolean, setIsDark: (v: boolean) => void }} */ ({
+    theme: 'dark',
+    setTheme: () => {},
+    toggleTheme: () => {},
     isDark: true,
     setIsDark: () => {},
-    toggleTheme: () => {},
   })
 )
 
 /**
- * Theme provider: dark is default; persists to localStorage and `html.dark`.
+ * Persists light/dark on `html.dark` and localStorage.
  * @param {{ children: import('react').ReactNode }} props
  */
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return true
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'light') return false
-    return true
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'dark'
+    return localStorage.getItem(STORAGE_KEY) || 'dark'
   })
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark)
-    localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light')
-  }, [isDark])
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    localStorage.setItem(STORAGE_KEY, theme)
+  }, [theme])
 
-  const toggleTheme = () => setIsDark((d) => !d)
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+  const setIsDark = (v) => setTheme(v ? 'dark' : 'light')
+  const isDark = theme === 'dark'
 
   return (
-    <ThemeContext.Provider value={{ isDark, setIsDark, toggleTheme }}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, isDark, setIsDark }}>
+      {children}
+    </ThemeContext.Provider>
   )
 }
 

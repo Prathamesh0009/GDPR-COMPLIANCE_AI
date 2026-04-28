@@ -1,8 +1,10 @@
+import { memo } from 'react'
+
 /**
  * Violation vs compliance split from mode_distribution.
  * @param {{ distribution: Record<string, number> }} props
  */
-export default function ModeChart({ distribution }) {
+function ModeChart({ distribution }) {
   const dist = distribution && typeof distribution === 'object' ? distribution : {}
   const v = dist.violation_analysis ?? 0
   const c = dist.compliance_assessment ?? 0
@@ -57,3 +59,5 @@ export default function ModeChart({ distribution }) {
     </div>
   )
 }
+
+export default memo(ModeChart)

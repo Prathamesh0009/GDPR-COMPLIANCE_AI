@@ -1,7 +1,10 @@
-/* eslint-disable react-refresh/only-export-components -- Provider + hook */
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useState } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { AlertCircle, CheckCircle, Info } from 'lucide-react'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { cn } from '@/lib/utils'
 
 const ToastContext = createContext({
   /** @type {(opts: { type?: 'success' | 'error' | 'info', message: string }) => void} */
@@ -39,14 +42,27 @@ export function ToastProvider({ children }) {
           {toast ? (
             <motion.div
               key={toast.id}
+              role="alert"
               initial={reduceMotion ? false : { x: 100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={reduceMotion ? false : { x: 100, opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.25 }}
-              className={`pointer-events-auto flex gap-3 rounded-lg border bg-slate-800 p-4 shadow-lg dark:bg-slate-800 ${styles[toast.type] ?? styles.info}`}
+              exit={
+                reduceMotion
+                  ? { opacity: 0, transition: { duration: 0 } }
+                  : {
+                      x: 100,
+                      opacity: 0,
+                      transition: { duration: 0.2 },
+                    }
+              }
+              transition={{ duration: reduceMotion ? 0 : 0.3 }}
+              className={cn(
+                'pointer-events-auto flex gap-3 rounded-lg border bg-white p-4 shadow-lg dark:bg-slate-800',
+                'border-slate-200 dark:border-slate-700',
+                styles[toast.type] ?? styles.info
+              )}
             >
               <Icon className="h-5 w-5 shrink-0" aria-hidden />
-              <p className="text-sm text-slate-100">{toast.message}</p>
+              <p className="text-sm text-slate-800 dark:text-slate-100">{toast.message}</p>
             </motion.div>
           ) : null}
         </AnimatePresence>

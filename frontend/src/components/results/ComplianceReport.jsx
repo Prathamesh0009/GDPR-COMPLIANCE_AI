@@ -1,4 +1,6 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 import ConfidenceChart from '@/components/results/ConfidenceChart'
 import DataFlowDiagram from '@/components/results/DataFlowDiagram'

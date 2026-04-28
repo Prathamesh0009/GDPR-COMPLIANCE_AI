@@ -1,5 +1,8 @@
-import { useReducedMotion } from 'framer-motion'
+import { memo } from 'react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useChartColors } from '@/lib/chartTheme'
 
 const ORDER = ['low', 'medium', 'high', 'critical', 'unknown']
 
@@ -19,12 +22,6 @@ const LABELS = {
   unknown: 'Unknown',
 }
 
-const tooltipStyle = {
-  background: 'rgb(30 41 59)',
-  border: '1px solid rgb(51 65 85)',
-  borderRadius: '0.5rem',
-}
-
 /**
  * Donut of severity counts; optional click navigates to filtered history.
  * @param {{
@@ -32,8 +29,9 @@ const tooltipStyle = {
  *   onSegmentClick?: (severityKey: string) => void,
  * }} props
  */
-export default function SeverityChart({ distribution, onSegmentClick }) {
+function SeverityChart({ distribution, onSegmentClick }) {
   const reduceMotion = useReducedMotion()
+  const c = useChartColors()
   const dist = distribution && typeof distribution === 'object' ? distribution : {}
 
   const data = ORDER.filter((k) => (dist[k] ?? 0) > 0).map((key) => ({
@@ -44,6 +42,12 @@ export default function SeverityChart({ distribution, onSegmentClick }) {
 
   const total = data.reduce((a, d) => a + d.value, 0)
 
+  const tooltipStyle = {
+    background: c.tooltipBg,
+    border: `1px solid ${c.tooltipBorder}`,
+    borderRadius: '0.5rem',
+  }
+
   if (!data.length) {
     return (
       <div className="flex h-64 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-500">
@@ -53,7 +57,11 @@ export default function SeverityChart({ distribution, onSegmentClick }) {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
+    <div
+      className="rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900"
+      role="img"
+      aria-label={`Severity distribution: ${total} queries`}
+    >
       <h3 className="mb-4 text-lg font-medium text-slate-800 dark:text-slate-200">
         Severity distribution
       </h3>
@@ -83,7 +91,7 @@ export default function SeverityChart({ distribution, onSegmentClick }) {
             </Pie>
             <Tooltip
               contentStyle={tooltipStyle}
-              labelStyle={{ color: 'rgb(148 163 184)', fontSize: 12 }}
+              labelStyle={{ color: c.tooltipMuted, fontSize: 12 }}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -94,7 +102,10 @@ export default function SeverityChart({ distribution, onSegmentClick }) {
       </div>
       <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2">
         {data.map((d) => (
-          <span key={d.key} className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+          <span
+            key={d.key}
+            className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400"
+          >
             <span className="h-2 w-2 rounded-full" style={{ background: FILL[d.key] }} aria-hidden />
             {d.name}: <span className="font-mono text-slate-800 dark:text-slate-200">{d.value}</span>
           </span>
@@ -103,3 +114,5 @@ export default function SeverityChart({ distribution, onSegmentClick }) {
     </div>
   )
 }
+
+export default memo(SeverityChart)

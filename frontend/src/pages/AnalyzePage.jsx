@@ -1,4 +1,6 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useEffect, useRef, useState } from 'react'
 
 import ModeToggle from '@/components/analyze/ModeToggle'
@@ -54,9 +56,9 @@ export default function AnalyzePage() {
       lastToastedAnalysisId.current = id
       showToast({ type: 'success', message: 'Analysis complete' })
       void refreshNavMetrics()
-      window.requestAnimationFrame(() => {
+      window.setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
+      }, 100)
     }
     if (!result) {
       lastToastedAnalysisId.current = null

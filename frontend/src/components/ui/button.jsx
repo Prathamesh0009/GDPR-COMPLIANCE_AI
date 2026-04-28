@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-indigo-500 text-white hover:bg-indigo-400 dark:bg-indigo-500 dark:hover:bg-indigo-400',
         secondary:
-          'border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700',
+          'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700',
         ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200',
       },
       size: {

@@ -1,5 +1,7 @@
 import { ArrowRight, Globe } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 import Card from '@/components/shared/Card'
 

@@ -1,7 +1,9 @@
-import { useReducedMotion } from 'framer-motion'
+import { memo } from 'react'
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 import Card from '@/components/shared/Card'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useChartColors } from '@/lib/chartTheme'
 
 const FILL = {
   compliant: '#10b981',
@@ -21,8 +23,9 @@ const LABELS = {
  * Donut of finding status counts.
  * @param {{ findings: Array<{ status?: string }> }} props
  */
-export default function RiskOverviewChart({ findings }) {
+function RiskOverviewChart({ findings }) {
   const reduceMotion = useReducedMotion()
+  const c = useChartColors()
   const counts = {}
   for (const f of findings || []) {
     const s = String(f.status || '').toLowerCase().replace(/-/g, '_')
@@ -39,12 +42,20 @@ export default function RiskOverviewChart({ findings }) {
 
   if (!data.length) return null
 
+  const tooltipStyle = {
+    background: c.tooltipBg,
+    border: `1px solid ${c.tooltipBorder}`,
+    borderRadius: '0.5rem',
+  }
+
   return (
     <Card>
-      <h3 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-50">
-        Risk overview
-      </h3>
-      <div className="relative h-64 w-full">
+      <h3 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-50">Risk overview</h3>
+      <div
+        className="relative h-64 w-full"
+        role="img"
+        aria-label={`Risk overview donut: ${total} findings`}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -64,14 +75,10 @@ export default function RiskOverviewChart({ findings }) {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{
-                background: 'rgb(30 41 59)',
-                border: '1px solid rgb(51 65 85)',
-                borderRadius: '0.5rem',
-              }}
-              labelStyle={{ color: 'rgb(148 163 184)', fontSize: 12 }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: c.tooltipMuted, fontSize: 12 }}
             />
-            <Legend wrapperStyle={{ fontSize: 12, color: 'rgb(148 163 184)' }} />
+            <Legend wrapperStyle={{ fontSize: 12, color: c.axis }} />
           </PieChart>
         </ResponsiveContainer>
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
@@ -82,3 +89,5 @@ export default function RiskOverviewChart({ findings }) {
     </Card>
   )
 }
+
+export default memo(RiskOverviewChart)

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
   Bar,
   BarChart,

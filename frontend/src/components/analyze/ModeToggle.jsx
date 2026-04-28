@@ -1,4 +1,6 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 import { MODES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -43,7 +45,7 @@ export default function ModeToggle({ value, onChange, disabled = false }) {
               transition={
                 reduceMotion
                   ? { duration: 0 }
-                  : { type: 'spring', stiffness: 400, damping: 30 }
+                  : { type: 'spring', stiffness: 500, damping: 30 }
               }
             />
           ) : null}

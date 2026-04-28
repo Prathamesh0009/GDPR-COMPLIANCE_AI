@@ -19,6 +19,27 @@ body {
   font-family: "JetBrains Mono", ui-monospace, monospace;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes gdpr-ripple-expand {
+    from {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0.45;
+    }
+    to {
+      transform: translate(-50%, -50%) scale(14);
+      opacity: 0;
+    }
+  }
+
+  .gdpr-ripple-dot {
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: gdpr-ripple-expand 0.55s ease-out forwards;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

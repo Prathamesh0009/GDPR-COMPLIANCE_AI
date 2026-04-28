@@ -1,6 +1,11 @@
 export const APP_NAME = 'GDPR AI'
 export const APP_VERSION = '3.0.0'
 
+export const BACKEND_URL_DISPLAY = 'http://localhost:8000'
+export const DEFAULT_APP_DB_PATH = 'data/app.db'
+export const AUTHOR_NAME = 'Prathamesh Patil'
+export const GITHUB_REPO_URL = 'https://github.com/prathameshpatil7/gdpr-ai'
+
 export const MODES = {
   VIOLATION: 'violation',
   COMPLIANCE: 'compliance',

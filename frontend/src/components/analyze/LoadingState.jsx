@@ -1,5 +1,7 @@
 import { Check, Loader2 } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
+
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useEffect, useMemo, useState } from 'react'
 
 import { MODES } from '@/lib/constants'
@@ -47,7 +49,11 @@ export default function LoadingState({ mode, elapsedSec }) {
   )
 
   return (
-    <div className="space-y-6 rounded-xl border border-slate-200 bg-slate-50/80 p-8 dark:border-slate-800 dark:bg-slate-900/50">
+    <div
+      className="space-y-6 rounded-xl border border-slate-200 bg-slate-50/80 p-8 dark:border-slate-800 dark:bg-slate-900/50"
+      aria-live="polite"
+      aria-busy="true"
+    >
       <div
         className="h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"
         aria-hidden
