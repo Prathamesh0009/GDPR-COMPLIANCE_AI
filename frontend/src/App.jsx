@@ -11,6 +11,7 @@ import Skeleton from '@/components/shared/Skeleton'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AnalysisCountProvider } from '@/context/AnalysisCountContext'
 import { AnalyzeProvider } from '@/context/AnalyzeContext'
+import { DebugProvider } from '@/context/DebugContext'
 import { ShellLayoutProvider, useShellLayout } from '@/context/ShellLayoutContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { ToastProvider } from '@/context/ToastContext'
@@ -104,13 +105,15 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <TooltipProvider>
-            <AnalysisCountProvider>
-              <AnalyzeProvider>
-                <ShellLayoutProvider>
-                  <AppShell />
-                </ShellLayoutProvider>
-              </AnalyzeProvider>
-            </AnalysisCountProvider>
+            <DebugProvider>
+              <AnalysisCountProvider>
+                <AnalyzeProvider>
+                  <ShellLayoutProvider>
+                    <AppShell />
+                  </ShellLayoutProvider>
+                </AnalyzeProvider>
+              </AnalysisCountProvider>
+            </DebugProvider>
           </TooltipProvider>
         </BrowserRouter>
       </ToastProvider>

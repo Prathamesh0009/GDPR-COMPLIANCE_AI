@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { useDebug } from '@/context/DebugContext'
+
 import { Activity, Moon, Sun } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -25,7 +27,10 @@ import {
  */
 export default function SettingsPage() {
   const { isDark, setIsDark } = useTheme()
+  const { debugMode, unlock, lock } = useDebug()
   const reduceMotionFramer = useReducedMotion()
+  const [debugCode, setDebugCode] = useState('')
+  const [invalidCode, setInvalidCode] = useState(false)
   const [health, setHealth] = useState(null)
   const [healthLoading, setHealthLoading] = useState(true)
   const [totalQueries, setTotalQueries] = useState(null)
@@ -55,6 +60,23 @@ export default function SettingsPage() {
     return () => window.clearTimeout(id)
   }, [probeHealth, loadStats])
 
+  useEffect(() => {
+    if (!invalidCode) return undefined
+    const t = window.setTimeout(() => setInvalidCode(false), 2000)
+    return () => window.clearTimeout(t)
+  }, [invalidCode])
+
+  const tryUnlockDebug = () => {
+    const trimmed = debugCode.trim()
+    if (!trimmed) return
+    if (unlock(trimmed)) {
+      setDebugCode('')
+      setInvalidCode(false)
+    } else {
+      setInvalidCode(true)
+    }
+  }
+
   const cardMotion = (i) => ({
     initial: reduceMotionFramer ? false : { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
@@ -74,7 +96,7 @@ export default function SettingsPage() {
 
       {showSkeleton ? (
         <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} className="h-40 w-full" />
           ))}
         </div>
@@ -158,6 +180,52 @@ export default function SettingsPage() {
           </motion.section>
 
           <motion.section {...cardMotion(3)}>
+            <Card className="border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-50">Developer</h2>
+              <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+                Optional debug visibility for internal identifiers (e.g. retrieval chunk IDs). Nothing is
+                stored in the browser; closing or refreshing the page turns this off.
+              </p>
+              {!debugMode ? (
+                <div className="space-y-3">
+                  <label className="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-500">
+                    Debug access code
+                  </label>
+                  <input
+                    type="password"
+                    value={debugCode}
+                    onChange={(e) => setDebugCode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') tryUnlockDebug()
+                    }}
+                    autoComplete="off"
+                    className="h-10 w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    placeholder="Enter code"
+                  />
+                  {invalidCode ? (
+                    <p className="text-sm text-rose-600 dark:text-rose-400" role="alert">
+                      Invalid code
+                    </p>
+                  ) : null}
+                  <Button type="button" onClick={tryUnlockDebug}>
+                    Unlock
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                    Debug mode enabled
+                  </span>
+                  <Button type="button" variant="secondary" onClick={() => lock()}>
+                    Lock
+                  </Button>
+                </div>
+              )}
+            </Card>
+          </motion.section>
+
+          <motion.section {...cardMotion(4)}>
             <Card className="border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
               <h2 className="mb-4 text-lg font-medium text-slate-900 dark:text-slate-50">About</h2>
               <p className="text-sm text-slate-700 dark:text-slate-300">

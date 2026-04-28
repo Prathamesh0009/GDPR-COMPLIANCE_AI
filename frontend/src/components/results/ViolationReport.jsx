@@ -11,6 +11,7 @@ import ConfidenceBar from '@/components/results/ConfidenceBar'
 import RecommendationList from '@/components/results/RecommendationList'
 import RetrievalGapNote from '@/components/results/RetrievalGapNote'
 import SeverityBadge from '@/components/results/SeverityBadge'
+import { useDebug } from '@/context/DebugContext'
 import { cn } from '@/lib/utils'
 
 /**
@@ -91,6 +92,7 @@ export default function ViolationReport({ analysisId, result, completedAt }) {
 function ViolationCard({ violation, index }) {
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
+  const { debugMode } = useDebug()
   const ids = violation.supporting_chunk_ids || []
   const url = violation.source_url?.trim()
 
@@ -118,9 +120,9 @@ function ViolationCard({ violation, index }) {
           <Collapsible.Content className="border-t border-slate-200 dark:border-slate-800">
             <div className="space-y-4 px-4 pb-4 pt-3 text-sm">
               <p className="leading-relaxed text-slate-700 dark:text-slate-300">{violation.description}</p>
-              {ids.length ? (
+              {debugMode && ids.length ? (
                 <div>
-                  <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-500">
+                  <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-500">
                     Supporting chunk IDs
                   </h4>
                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400">{ids.join(', ')}</p>

@@ -12,9 +12,10 @@ import {
 import Card from '@/components/shared/Card'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useChartColors } from '@/lib/chartTheme'
+import { shortArticleAxisLabel } from '@/lib/articleAxisLabel'
 
 /**
- * Vertical bar chart of relative article emphasis (mention count / max).
+ * Horizontal bar chart of relative article emphasis (mention count / max).
  * @param {{ findings: Array<{ relevant_articles?: string[] }> }} props
  */
 function ConfidenceChart({ findings }) {
@@ -29,8 +30,9 @@ function ConfidenceChart({ findings }) {
     }
     const max = Math.max(...Object.values(counts), 1)
     return Object.entries(counts)
-      .map(([article, n]) => ({
-        article,
+      .map(([articleFull, n]) => ({
+        articleFull,
+        articleShort: shortArticleAxisLabel(articleFull),
         weight: n / max,
       }))
       .sort((a, b) => b.weight - a.weight)
@@ -39,23 +41,25 @@ function ConfidenceChart({ findings }) {
 
   if (!data.length) return null
 
-  const tooltipStyle = {
-    background: c.tooltipBg,
-    border: `1px solid ${c.tooltipBorder}`,
-    borderRadius: '0.5rem',
-  }
+  const chartHeight = Math.max(250, data.length * 40)
 
   return (
     <Card>
       <h3 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-50">
         Article emphasis (relative)
       </h3>
-      <div className="h-72 w-full" role="img" aria-label="Relative article emphasis bar chart">
+      <div
+        className="w-full"
+        style={{ height: chartHeight }}
+        role="img"
+        aria-label="Relative article emphasis bar chart"
+      >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ left: 8, right: 16, top: 8, bottom: 8 }}
+            margin={{ left: 88, right: 20, top: 12, bottom: 12 }}
+            barCategoryGap="12%"
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -71,22 +75,41 @@ function ConfidenceChart({ findings }) {
             />
             <YAxis
               type="category"
-              dataKey="article"
-              width={120}
-              tick={{
-                fill: c.axis,
-                fontSize: 10,
-                fontFamily: 'JetBrains Mono, monospace',
-              }}
+              dataKey="articleShort"
+              width={84}
+              tick={{ fill: c.axis, fontSize: 11 }}
+              interval={0}
             />
             <Tooltip
-              contentStyle={tooltipStyle}
-              labelStyle={{ color: c.tooltipMuted, fontSize: 12 }}
+              cursor={{ fill: c.primaryArea }}
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null
+                const row = payload[0]?.payload
+                if (!row) return null
+                const pct = Math.round((row.weight ?? 0) * 100)
+                return (
+                  <div
+                    className="rounded-lg border p-3 shadow-lg"
+                    style={{
+                      background: c.tooltipBg,
+                      borderColor: c.tooltipBorder,
+                    }}
+                  >
+                    <p className="text-sm font-medium" style={{ color: c.tooltipText }}>
+                      {row.articleFull}
+                    </p>
+                    <p className="mt-1 text-xs" style={{ color: c.tooltipMuted }}>
+                      {pct}% relative emphasis
+                    </p>
+                  </div>
+                )
+              }}
             />
             <Bar
               dataKey="weight"
               fill={c.primary}
               radius={[0, 4, 4, 0]}
+              barSize={16}
               isAnimationActive={!reduceMotion}
               animationDuration={600}
             />
