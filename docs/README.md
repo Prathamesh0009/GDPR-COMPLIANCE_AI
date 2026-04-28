@@ -17,6 +17,17 @@ Every document in this folder is version-controlled and updated in lockstep with
 
 Version 1 delivers a **violation analyzer**: free-text scenarios in, grounded violation reports with cited GDPR articles out. Version 2 expands the same product into a **compliance architect** while keeping v1 intact as a first-class mode. v2 accepts a structured (or conversational) **system description** and produces a **compliance blueprint** — risk analysis, DPIA drafts, RoPA templates, consent-flow recommendations, technical implementation guidance, and retention policy drafts — backed by the same retrieval-grounded knowledge base and language-model reasoning engine. v2 adds a REST API (local), SQLite persistence for projects and generated documents, document generation (Jinja2 → markdown), and a new pipeline (**intake → map → assess → generate**) alongside the existing v1 pipeline (**extract → classify → retrieve → reason**). The **browser UI is v3**, not v2. All design docs use clearly marked **v2** sections so v1 material stays easy to find; see [ADR-006](adr/006-dual-mode-architecture.md) and [ADR-007](adr/007-sqlite-for-local-persistence.md).
 
+## V3 — Frontend planning (local SPA)
+
+Implementation-agnostic specs for the **React + Vite** dashboard (v3): overview, design system, motion, component tree, API integration, milestones.
+
+* [v3-overview.md](v3-overview.md)
+* [v3-design-system.md](v3-design-system.md)
+* [v3-animations.md](v3-animations.md)
+* [v3-component-tree.md](v3-component-tree.md)
+* [v3-api-integration.md](v3-api-integration.md)
+* [v3-roadmap.md](v3-roadmap.md)
+
 ## Phase 0 – Overview
 
 Foundational framing of what GDPR AI is, why it exists, who it serves, and how it will be delivered.
