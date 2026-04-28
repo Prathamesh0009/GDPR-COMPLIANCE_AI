@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import ModeToggle from '@/components/analyze/ModeToggle'
 import ScenarioInput from '@/components/analyze/ScenarioInput'
@@ -10,8 +10,8 @@ import LoadingState from '@/components/analyze/LoadingState'
 import ComplianceReport from '@/components/results/ComplianceReport'
 import ViolationReport from '@/components/results/ViolationReport'
 import { Button } from '@/components/ui/button'
+import { useAnalysisCount } from '@/context/AnalysisCountContext'
 import { useAnalyzeContext } from '@/context/AnalyzeContext'
-import { useNavMetrics } from '@/context/NavMetricsContext'
 import { useToast } from '@/context/ToastContext'
 import { MODES } from '@/lib/constants'
 
@@ -38,10 +38,9 @@ export default function AnalyzePage() {
     clearAnalysisState,
   } = useAnalyzeContext()
   const { showToast } = useToast()
-  const { refresh: refreshNavMetrics } = useNavMetrics()
+  const { refresh: refreshAnalysisCount, increment: bumpAnalysisCount } = useAnalysisCount()
   const resultsRef = useRef(null)
   const lastToastedAnalysisId = useRef(null)
-  const skipModeClearOnMount = useRef(true)
   const reduceMotion = useReducedMotion()
 
   const maxLength = mode === MODES.VIOLATION ? MAX_VIOLATION : MAX_COMPLIANCE
@@ -58,20 +57,23 @@ export default function AnalyzePage() {
     clear()
   }
 
-  useEffect(() => {
-    if (skipModeClearOnMount.current) {
-      skipModeClearOnMount.current = false
-      return
-    }
-    clearAnalysisState()
-  }, [mode, clearAnalysisState])
+  const handleModeChange = useCallback(
+    (newMode) => {
+      if (newMode === mode) return
+      setMode(newMode)
+      setInputText('')
+      clearAnalysisState()
+    },
+    [mode, setMode, setInputText, clearAnalysisState]
+  )
 
   useEffect(() => {
     const id = result?.analysis_id
     if (id && id !== lastToastedAnalysisId.current) {
       lastToastedAnalysisId.current = id
       showToast({ type: 'success', message: 'Analysis complete' })
-      void refreshNavMetrics()
+      bumpAnalysisCount()
+      void refreshAnalysisCount()
       window.setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 100)
@@ -79,7 +81,7 @@ export default function AnalyzePage() {
     if (!result) {
       lastToastedAnalysisId.current = null
     }
-  }, [result, showToast, refreshNavMetrics])
+  }, [result, showToast, bumpAnalysisCount, refreshAnalysisCount])
 
   useEffect(() => {
     if (error) {
@@ -97,7 +99,7 @@ export default function AnalyzePage() {
         Run violation analysis or a compliance assessment against your local GDPR AI API. Results appear
         below when the run finishes.
       </p>
-      <ModeToggle value={mode} onChange={setMode} disabled={loading} />
+      <ModeToggle value={mode} onChange={handleModeChange} disabled={loading} />
       <ScenarioInput
         value={inputText}
         onChange={setInputText}

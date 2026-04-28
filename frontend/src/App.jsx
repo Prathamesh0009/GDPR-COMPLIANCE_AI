@@ -9,8 +9,8 @@ import Sidebar from '@/components/layout/Sidebar'
 import ErrorBoundary from '@/components/shared/ErrorBoundary'
 import Skeleton from '@/components/shared/Skeleton'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { AnalysisCountProvider } from '@/context/AnalysisCountContext'
 import { AnalyzeProvider } from '@/context/AnalyzeContext'
-import { NavMetricsProvider } from '@/context/NavMetricsContext'
 import { ShellLayoutProvider, useShellLayout } from '@/context/ShellLayoutContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { ToastProvider } from '@/context/ToastContext'
@@ -104,13 +104,13 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <TooltipProvider>
-            <NavMetricsProvider>
+            <AnalysisCountProvider>
               <AnalyzeProvider>
                 <ShellLayoutProvider>
                   <AppShell />
                 </ShellLayoutProvider>
               </AnalyzeProvider>
-            </NavMetricsProvider>
+            </AnalysisCountProvider>
           </TooltipProvider>
         </BrowserRouter>
       </ToastProvider>

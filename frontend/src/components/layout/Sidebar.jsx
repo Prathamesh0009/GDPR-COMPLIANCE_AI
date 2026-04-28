@@ -2,7 +2,7 @@ import { BarChart3, ChevronLeft, ChevronRight, Clock, Search, Settings } from 'l
 import { NavLink } from 'react-router-dom'
 
 import { SimpleTooltip } from '@/components/ui/tooltip'
-import { useNavMetrics } from '@/context/NavMetricsContext'
+import { useAnalysisCount } from '@/context/AnalysisCountContext'
 import { useShellLayout } from '@/context/ShellLayoutContext'
 import { APP_NAME, APP_VERSION, NAV_ITEMS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -14,12 +14,15 @@ const ICON_MAP = {
   Settings,
 }
 
+/** Above this value the sidebar shows a capped label (matches History list limit semantics). */
+const HISTORY_BADGE_CAP = 99
+
 /**
  * Primary navigation: full width on desktop when expanded, icon rail when collapsed.
  * @param {{ className?: string }} props
  */
 export default function Sidebar({ className }) {
-  const { totalQueries } = useNavMetrics()
+  const { count: analysisCount } = useAnalysisCount()
   const {
     isLg,
     desktopCollapsed,
@@ -32,10 +35,10 @@ export default function Sidebar({ className }) {
   const narrow = !sidebarWide
 
   const historyCountLabel =
-    totalQueries != null && totalQueries > 0
-      ? totalQueries > 99
-        ? '99+'
-        : String(totalQueries)
+    analysisCount != null && analysisCount > 0
+      ? analysisCount > HISTORY_BADGE_CAP
+        ? `${HISTORY_BADGE_CAP}+`
+        : String(analysisCount)
       : null
 
   return (
@@ -117,7 +120,7 @@ export default function Sidebar({ className }) {
                   {narrow && item.path === '/history' && historyCountLabel ? (
                     <span
                       className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-200 px-1 text-[10px] font-semibold leading-none text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-                      aria-label={`${totalQueries} analyses in history`}
+                      aria-label={`${analysisCount} analyses in history`}
                     >
                       {historyCountLabel}
                     </span>
