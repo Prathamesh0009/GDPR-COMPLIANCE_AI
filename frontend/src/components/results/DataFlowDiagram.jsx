@@ -1,4 +1,4 @@
-import { ArrowRight, Globe } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -6,8 +6,8 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import Card from '@/components/shared/Card'
 
 /**
- * Simple source → destination flow rows.
- * @param {{ flows: Array<{ source?: string, destination?: string, crosses_border?: boolean, destination_country?: string | null }> }} props
+ * Simple source → destination flow rows (no country / cross-border badges).
+ * @param {{ flows: Array<{ source?: string, destination?: string }> }} props
  */
 export default function DataFlowDiagram({ flows }) {
   const reduceMotion = useReducedMotion()
@@ -28,16 +28,10 @@ export default function DataFlowDiagram({ flows }) {
             <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-medium text-slate-800 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-100">
               {flow.source || '—'}
             </span>
-            <ArrowRight className="h-4 w-4 text-slate-400" aria-hidden />
+            <ArrowRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
             <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-medium text-slate-800 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-100">
               {flow.destination || '—'}
             </span>
-            {flow.crosses_border ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-                <Globe className="h-3 w-3" aria-hidden />
-                {flow.destination_country || 'Cross-border'}
-              </span>
-            ) : null}
           </motion.li>
         ))}
       </ul>
