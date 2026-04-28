@@ -1,0 +1,46 @@
+# Consent Flow Recommendations
+## System: {{ assessment.system_name }}
+## Date: {{ generated_date }}
+
+> ⚠️ Automated draft from the tool. Legal review required.
+
+## Processing Activities Requiring Explicit Consent
+
+{% for purpose in purposes_needing_consent %}
+### {{ purpose.purpose }}
+- Data: {{ purpose.data_categories | join(', ') }}
+- Why consent is needed: {{ get_consent_reason(purpose) }}
+- Consent requirements:
+  - Must be freely given, specific, informed, and unambiguous
+  - Separate from other terms and conditions
+  - Easy to withdraw (as easy as to give)
+  - Record of consent must be maintained
+
+{% else %}
+_None classified as standard consent cases by the template heuristics._
+{% endfor %}
+
+## Processing Activities Where Legitimate Interest May Apply
+
+{% for purpose in purposes_legitimate_interest %}
+### {{ purpose.purpose }}
+- Data: {{ purpose.data_categories | join(', ') }}
+- Legitimate interest assessment needed:
+  1. Purpose test: Is the interest legitimate?
+  2. Necessity test: Is processing necessary for that interest?
+  3. Balancing test: Do data subject rights override?
+
+{% else %}
+_No purposes were flagged for legitimate interest in the assessment inputs._
+{% endfor %}
+
+## Processing Activities Requiring Special Category Consent (Art. 9)
+
+{% for purpose in purposes_special_category %}
+### {{ purpose.purpose }}
+- Explicit consent required under Article 9(2)(a) (where applicable)
+- Data: {{ purpose.data_categories | join(', ') }}
+
+{% else %}
+_No special-category processing was identified from category metadata._
+{% endfor %}

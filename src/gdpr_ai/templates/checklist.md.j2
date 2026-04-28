@@ -1,0 +1,14 @@
+# GDPR Technical Compliance Checklist
+## System: {{ assessment.system_name }}
+## Date: {{ generated_date }}
+
+> ⚠️ Automated draft from the tool. Review before implementation.
+
+{% for finding in assessment.findings %}
+- [ ] **{{ finding.area }}** ({{ finding.status.value }})
+  - Articles: {{ finding.relevant_articles | join(', ') }}
+  - {{ finding.description }}
+  {% if finding.remediation %}- Action: {{ finding.remediation }}{% endif %}
+  {% if finding.technical_guidance %}- Technical: {{ finding.technical_guidance }}{% endif %}
+
+{% endfor %}

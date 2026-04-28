@@ -1,0 +1,18 @@
+{
+  "source_url": "https://example.invalid/ropa",
+  "controller_record_fields": [
+    {
+      "field": "Test field",
+      "description": "Test description",
+      "example": "Example value"
+    }
+  ],
+  "processor_record_fields": [
+    {
+      "field": "Processor field",
+      "description": "Processor description",
+      "example": "Processor example"
+    }
+  ],
+  "article_30_excerpt": "Article 30 requires records of processing activities."
+}

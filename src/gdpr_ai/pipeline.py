@@ -1,4 +1,5 @@
 """End-to-end GDPR analysis pipeline (extract → classify → retrieve → reason → validate)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -10,7 +11,12 @@ from typing import Any
 
 from gdpr_ai.config import settings
 from gdpr_ai.exceptions import ExtractionFailed, HallucinationDetected, ReasoningFailed
-from gdpr_ai.llm.client import LLMResult, complete_text, extract_json_object
+from gdpr_ai.llm.client import (
+    LLMResult,
+    complete_text,
+    extract_json_object_with_repair,
+    is_truncated_json_error,
+)
 from gdpr_ai.logger import log_query
 from gdpr_ai.models import AnalysisReport, ClassifiedTopics, ExtractedEntities, RetrievedChunk
 from gdpr_ai.prompts import render_prompt
@@ -22,9 +28,14 @@ logger = logging.getLogger(__name__)
 def _retrieved_articles_summary(chunks: list[RetrievedChunk]) -> str:
     """Comma-separated unique citation labels from chunk metadata (for logs)."""
     refs = sorted(
-        {str(c.metadata.get("article_number", "")).strip() for c in chunks if c.metadata.get("article_number")}
+        {
+            str(c.metadata.get("article_number", "")).strip()
+            for c in chunks
+            if c.metadata.get("article_number")
+        }
     )
     return ",".join(refs)
+
 
 _ALLOWED_TOPICS = {
     "legal-basis",
@@ -68,19 +79,22 @@ async def _call_stage_json(
     retries: int = 3,
 ) -> tuple[dict[str, Any], LLMResult]:
     last_err: Exception | None = None
+    current_cap = max_tokens
     for attempt in range(retries + 1):
         try:
             res = await complete_text(
                 model=model,
                 system=system_header,
                 user=user,
-                max_tokens=max_tokens,
+                max_tokens=current_cap,
             )
-            data = extract_json_object(res.text)
+            data, _ = extract_json_object_with_repair(res.text)
             return data, res
         except Exception as exc:  # noqa: BLE001
             last_err = exc
             logger.warning("Stage parse failed (attempt %s): %s", attempt + 1, exc)
+            if attempt < retries and is_truncated_json_error(exc):
+                current_cap = min(current_cap + 4096, 32768)
             await asyncio.sleep(0.4 * (attempt + 1))
     raise last_err  # type: ignore[misc]
 
@@ -209,8 +223,8 @@ async def validate_report_llm(
     return report, res
 
 
-async def run_pipeline(scenario_text: str) -> AnalysisReport:
-    """Execute all stages with retries and logging."""
+async def run_pipeline_logged(scenario_text: str) -> tuple[AnalysisReport, str]:
+    """Execute all stages with retries and logging; returns the query log id."""
     t_run = time.perf_counter()
     query_id = str(uuid.uuid4())
     total_in = total_out = 0
@@ -285,5 +299,12 @@ async def run_pipeline(scenario_text: str) -> AnalysisReport:
         estimated_cost_eur=total_cost,
         model_reasoning=settings.model_reasoning,
         query_id=query_id,
+        analysis_mode="violation_analysis",
     )
+    return report, query_id
+
+
+async def run_pipeline(scenario_text: str) -> AnalysisReport:
+    """Execute all stages with retries and logging."""
+    report, _ = await run_pipeline_logged(scenario_text)
     return report

@@ -25,6 +25,7 @@ from gdpr_ai.knowledge.topics import (
     tags_for_gdpr_recital,
     tags_for_ttdsg_section,
 )
+from gdpr_ai.knowledge.v2_chunk_builders import load_v2_rows_from_raw
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -257,6 +258,31 @@ def main() -> None:
     logger.info("Done. chunks=%s avg_words=%.1f", len(texts), sum(sizes) / max(1, len(sizes)))
     logger.info("Chroma path: %s", settings.chroma_path)
     logger.info("BM25 path: %s", settings.bm25_index_path)
+
+    embed_v2_auxiliary_collections()
+
+
+def embed_v2_auxiliary_collections(raw_dir: Path | None = None) -> None:
+    """Index v2 auxiliary Chroma collections (DPIA, RoPA, TOM, consent, AI Act)."""
+    src = raw_dir or RAW
+    bundles = load_v2_rows_from_raw(src)
+    client = chromadb.PersistentClient(path=str(settings.chroma_path))
+    for coll_name, rows in bundles.items():
+        if not rows:
+            logger.warning("v2 collection %s: no rows (run v2 scrape scripts)", coll_name)
+            continue
+        texts = [r.text for r in rows]
+        metadatas = [r.metadata for r in rows]
+        ids = [r.chunk_id for r in rows]
+        logger.info("Embedding v2 collection %s (%s chunks)", coll_name, len(texts))
+        embeddings = embed_texts(settings.embedding_model, texts, batch_size=8)
+        try:
+            client.delete_collection(coll_name)
+        except Exception:  # noqa: BLE001
+            pass
+        coll = client.create_collection(name=coll_name, metadata={"hnsw:space": "cosine"})
+        coll.add(ids=ids, documents=texts, embeddings=embeddings, metadatas=metadatas)
+        logger.info("Indexed v2 collection %s", coll_name)
 
 
 if __name__ == "__main__":

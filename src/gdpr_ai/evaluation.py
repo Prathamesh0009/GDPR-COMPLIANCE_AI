@@ -1,4 +1,5 @@
 """Gold-set metrics and knowledge-base article inventory for evaluation runs."""
+
 from __future__ import annotations
 
 import re
@@ -6,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import chromadb
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from gdpr_ai.config import settings
 from gdpr_ai.llm.client import estimate_cost_eur
@@ -22,6 +23,28 @@ def load_gold_scenarios(path: Path) -> list[dict[str, Any]]:
     else:
         raise ValueError("Gold file must contain a list or a 'scenarios' key")
     return [r for r in rows if isinstance(r, dict) and r.get("id")]
+
+
+def filter_unified_scenarios(
+    scenarios: list[dict[str, Any]],
+    *,
+    mode: str | None = None,
+    ids: list[str] | None = None,
+    difficulty: str | None = None,
+    category: str | None = None,
+) -> list[dict[str, Any]]:
+    """Filter unified gold rows by mode, ids, difficulty, or category."""
+    out = list(scenarios)
+    if mode:
+        out = [s for s in out if str(s.get("mode", "")) == mode]
+    if ids:
+        want = {str(i).strip() for i in ids if str(i).strip()}
+        out = [s for s in out if str(s.get("id", "")) in want]
+    if difficulty:
+        out = [s for s in out if str(s.get("difficulty", "")) == difficulty]
+    if category:
+        out = [s for s in out if str(s.get("category", "")) == category]
+    return out
 
 
 def normalize_article_ref(label: str) -> str:
@@ -119,7 +142,11 @@ def scenario_metrics(
     }
 
 
-def estimate_eval_run_cost_eur(num_scenarios: int, calls_per_scenario: int = 4, tokens_per_call: int = 2000) -> float:
+def estimate_eval_run_cost_eur(
+    num_scenarios: int,
+    calls_per_scenario: int = 4,
+    tokens_per_call: int = 2000,
+) -> float:
     """Rough order-of-magnitude cost for a full eval run (reasoning-heavy stages dominate)."""
     total_in = num_scenarios * calls_per_scenario * int(tokens_per_call * 0.55)
     total_out = num_scenarios * calls_per_scenario * int(tokens_per_call * 0.45)
