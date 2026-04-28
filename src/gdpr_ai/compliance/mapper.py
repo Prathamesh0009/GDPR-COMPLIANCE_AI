@@ -67,7 +67,7 @@ def _blob_for_topic_inference(dm: DataMap) -> str:
     parts.extend(p.legal_basis_claimed or "" for p in dm.processing_purposes)
     for s in dm.storage:
         parts.append(s.location)
-        parts.append(s.country)
+        parts.append(s.country or "")
         parts.append(s.retention_period or "")
     for tp in dm.third_parties:
         parts.append(tp.name)
@@ -186,7 +186,7 @@ def map_articles(data_map: DataMap) -> dict[str, list[RetrievedChunk]]:
     for store in data_map.storage:
         q = (
             f"Security and storage limitation for location {store.location} "
-            f"({store.country}), retention {store.retention_period or 'unspecified'}."
+            f"({store.country or 'unspecified'}), retention {store.retention_period or 'unspecified'}."
         )
         article_map[f"storage:{store.location}"] = _retrieve_merged(q, topics_ctx)
 

@@ -87,7 +87,7 @@ class StorageInfo(BaseModel):
     """Where data is stored and how long."""
 
     location: str = Field(..., description="e.g. AWS eu-central-1")
-    country: str
+    country: str | None = None
     encryption_at_rest: bool | None = None
     encryption_in_transit: bool | None = None
     retention_period: str | None = None
