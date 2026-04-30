@@ -237,6 +237,24 @@ Every chunk carries `source`, `source_url`, and `license` metadata for traceabil
 
 Violation analysis now defaults to **deterministic article mapping** (`data/gdpr_article_map.yaml`) plus **cross-reference expansion** (`data/gdpr_cross_references.yaml`), then a **single assembled full-text context chunk** when `data/gdpr_articles_fulltext.yaml` is populated (otherwise text is filled from `data/raw/gdpr_articles.json` after scraping). Hybrid Chroma + BM25 still runs as a **fallback** merge. Set `DETERMINISTIC_RETRIEVAL=false` to use legacy semantic-only retrieval. After scraping, run `uv run python scripts/export_gdpr_fulltext_yaml.py` to build the YAML article store. Eval baselines: run `uv run python tests/run_eval.py` before/after and compare with `uv run python tests/compare_eval.py`.
 
+### Retrieval accuracy (v3 vs v4)
+
+Hand-maintained targets live in `gold/baseline.json`. For a **live** machine-local comparison (writes JSON reports under `gold/`):
+
+```bash
+DETERMINISTIC_RETRIEVAL=false uv run python tests/run_eval.py --output gold/baseline_v3_semantic.json --yes
+DETERMINISTIC_RETRIEVAL=true VERIFICATION_ENABLED=true uv run python tests/run_eval.py --output gold/eval_v4_accuracy.json --yes
+uv run python tests/compare_eval.py gold/baseline_v3_semantic.json gold/eval_v4_accuracy.json
+```
+
+| Metric | v3 targets (`gold/baseline.json`) | v4 (fill from `eval_v4_accuracy.json`) | Improvement |
+|--------|-----------------------------------|----------------------------------------|-------------|
+| Article precision (violation) | 91% | — | Run eval to measure |
+| Article recall (violation) | 87% | — | Run eval to measure |
+| Finding coverage (compliance) | 85% | — | Run eval to measure |
+
+After each eval run, read `violation_analysis_summary` and `compliance_assessment_summary` in the output JSON for averages.
+
 ---
 
 ## Product roadmap
