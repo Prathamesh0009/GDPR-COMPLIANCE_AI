@@ -11,7 +11,13 @@ from typing import Any
 from gdpr_ai.config import settings
 from gdpr_ai.models import ClassifiedTopics, ExtractedEntities, RetrievedChunk
 from gdpr_ai.retrieval.article_map import primary_article_number, resolve_articles
-from gdpr_ai.retrieval.article_store import assemble_context, eurlex_source_url
+from gdpr_ai.retrieval.article_store import (
+    assemble_targeted_context,
+    eurlex_source_url,
+    get_article_text,
+    keyword_match_score,
+    targeting_keywords,
+)
 from gdpr_ai.retrieval.cross_ref_graph import expand_articles
 
 logger = logging.getLogger(__name__)
@@ -50,6 +56,39 @@ def _with_retrieval_source(chunk: RetrievedChunk, source: str) -> RetrievedChunk
     meta = dict(chunk.metadata)
     meta["retrieval_source"] = source
     return chunk.model_copy(update={"metadata": meta})
+
+
+def _rank_novel_in_layer(article_nums: set[str], keywords: list[str]) -> list[str]:
+    """Order articles: higher query keyword overlap with full text first, then numeric."""
+    nums = {primary_article_number(a) for a in article_nums}
+    return sorted(
+        nums,
+        key=lambda a: (-keyword_match_score(get_article_text(a) or "", keywords), int(a)),
+    )
+
+
+def _pick_supplement_articles(
+    *,
+    novel_arts: set[str],
+    mapped_norm: set[str],
+    query_keywords: list[str],
+    cap: int,
+) -> list[str]:
+    """Layer 1 (map) novel articles first, then layer 2 (graph-only), each keyword-ranked."""
+    if cap <= 0 or not novel_arts:
+        return []
+    novel_from_map = novel_arts & mapped_norm
+    novel_from_graph = novel_arts - mapped_norm
+    ordered: list[str] = []
+    for bucket in (
+        _rank_novel_in_layer(novel_from_map, query_keywords),
+        _rank_novel_in_layer(novel_from_graph, query_keywords),
+    ):
+        for a in bucket:
+            if len(ordered) >= cap:
+                return ordered
+            ordered.append(a)
+    return ordered
 
 
 @dataclass
@@ -139,24 +178,29 @@ def retrieve_deterministic(
     graph_depth: int | None = None,
     max_context_tokens: int | None = None,
 ) -> RetrievalResult:
-    """Layer 1–3 orchestration: map → expand → always merge hybrid semantic when enabled.
+    """Semantic-first retrieval with deterministic supplement for map/graph gaps only.
 
-    When ``use_semantic_fallback`` is True (default from ``retrieve()``), runs full ``top_k``
-    semantic retrieval and unions it with deterministic map/graph articles. Deterministic
-    full-text chunks are added only for articles not already covered by semantic chunk
-    metadata, so chunk/RAG-shaped context is preserved while map-only articles are
-    supplemented with assembled GDPR full text.
+    Runs hybrid semantic search as the baseline, then adds targeted GDPR full text only for
+    articles produced by the article map and cross-reference graph that are **not** already
+    represented in semantic chunk metadata—capped and keyword-prioritized to limit dilution.
     """
     k = top_k if top_k is not None else settings.top_k
     depth = settings.deterministic_graph_depth if graph_depth is None else graph_depth
-    max_tok = (
+    # Legacy hook: deterministic_max_context_tokens no longer applies to merged chunks
+    # (supplement uses assemble_targeted_context per article). Kept for API stability.
+    _ = (
         settings.deterministic_max_context_tokens
         if max_context_tokens is None
         else max_context_tokens
     )
 
-    kw = _entity_keywords(entities)
-    gdpr_map, recitals, _bdsg, _ttdsg = resolve_articles(topics.topics or [], kw, text_blob=query)
+    kw_entities = _entity_keywords(entities)
+    query_keywords = targeting_keywords(query, kw_entities)
+    gdpr_map, recitals, _bdsg, _ttdsg = resolve_articles(
+        topics.topics or [],
+        kw_entities,
+        text_blob=query,
+    )
     mapped_norm = {primary_article_number(a) for a in gdpr_map}
     expanded = expand_articles(mapped_norm, depth=depth)
     graph_only = expanded - mapped_norm
@@ -169,23 +213,32 @@ def retrieve_deterministic(
         sem_arts = _article_nums_from_chunks(semantic)
 
     all_article_union = all_art | sem_arts
-    sem_only = sem_arts - all_art
-    priority_list = (
-        sorted(mapped_norm, key=int)
-        + sorted(graph_only, key=int)
-        + sorted(sem_only, key=int)
+    novel_arts = all_art - sem_arts
+    max_supplement = settings.max_deterministic_supplement_articles
+    injected_ordered = _pick_supplement_articles(
+        novel_arts=novel_arts,
+        mapped_norm=mapped_norm,
+        query_keywords=query_keywords,
+        cap=max_supplement,
     )
+    injected_set = set(injected_ordered)
 
-    full_block = assemble_context(
-        all_article_union,
-        max_tokens=max_tok,
-        priority_order=priority_list,
+    logger.info("Semantic search found articles: %s", sorted(sem_arts, key=int))
+    logger.info("Deterministic map found articles: %s", sorted(all_art, key=int))
+    logger.info("Novel articles (deterministic only): %s", sorted(novel_arts, key=int))
+    logger.info(
+        "Injecting %s supplementary articles (cap: %s)",
+        len(injected_ordered),
+        max_supplement,
     )
 
     meta: dict[str, Any] = {
         "mapped_article_count": len(mapped_norm),
         "expanded_article_count": len(all_art),
         "recital_count": len(recitals),
+        "novel_article_count": len(novel_arts),
+        "supplement_injected_articles": injected_ordered,
+        "max_deterministic_supplement_articles": max_supplement,
     }
 
     article_sources: dict[str, list[str]] = {}
@@ -199,15 +252,18 @@ def retrieve_deterministic(
         article_sources[key] = sorted(frozenset(paths))
     meta["article_sources"] = article_sources
 
-    extra_arts = all_art - sem_arts
     supp_chunks: list[RetrievedChunk] = []
-    if extra_arts:
-        supp_block = assemble_context(
-            extra_arts,
-            max_tokens=max_tok,
-            priority_order=sorted(extra_arts, key=int),
+    supp_block = ""
+    if injected_set:
+        supp_block = assemble_targeted_context(
+            injected_ordered,
+            query_keywords,
         )
-        raw_supp = _fulltext_chunks_for_articles(extra_arts, tier="map+graph", block=supp_block)
+        raw_supp = _fulltext_chunks_for_articles(
+            injected_set,
+            tier="deterministic_supplement",
+            block=supp_block,
+        )
         supp_chunks = [_with_retrieval_source(c, "deterministic_map_graph") for c in raw_supp]
 
     semantic_tagged = [_with_retrieval_source(c, "semantic") for c in semantic]
@@ -219,7 +275,7 @@ def retrieve_deterministic(
         articles_from_graph=graph_only,
         articles_from_semantic=sem_arts,
         all_articles=all_article_union,
-        full_text_context=full_block,
+        full_text_context=supp_block,
         recitals=set(recitals),
         retrieval_metadata=meta,
     )

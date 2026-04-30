@@ -135,6 +135,96 @@ def _approx_tokens(text: str) -> int:
     return max(1, len(text) // 4)
 
 
+def keyword_match_score(text: str, keywords: list[str]) -> int:
+    """Count how many keywords appear as substrings in ``text`` (case-insensitive)."""
+    if not text or not keywords:
+        return 0
+    low = text.lower()
+    n = 0
+    seen_kw: set[str] = set()
+    for kw in keywords:
+        k = kw.strip().lower()
+        if len(k) < 2 or k in seen_kw:
+            continue
+        seen_kw.add(k)
+        if k in low:
+            n += 1
+    return n
+
+
+def targeting_keywords(query: str, entity_keyword_parts: list[str] | None = None) -> list[str]:
+    """Build deduplicated keywords for paragraph targeting from the query and entity strings."""
+    parts: list[str] = list(entity_keyword_parts or [])
+    parts.append(query)
+    out: list[str] = []
+    seen: set[str] = set()
+    for p in parts:
+        for token in re.findall(r"[\w-]{3,}", (p or "").lower()):
+            if token not in seen:
+                seen.add(token)
+                out.append(token)
+    return out
+
+
+def _split_gdpr_numbered_segments(full_text: str) -> list[str]:
+    """Split article body on whitespace before numbered clauses (``1.``, ``2.``, ...)."""
+    t = full_text.strip()
+    if not t:
+        return []
+    pieces = re.split(r"(?<=\S)\s+(?=\d+\.\s)", t)
+    return [p.strip() for p in pieces if p.strip()]
+
+
+def _trim_to_approx_tokens(text: str, max_tokens: int) -> str:
+    max_chars = max(1, max_tokens * 4)
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars].rstrip() + "\n[... truncated ...]\n"
+
+
+def _targeted_body_for_article(
+    article_number: str,
+    keywords: list[str],
+    *,
+    max_tokens_per_article: int,
+) -> str | None:
+    """Return heading + filtered paragraphs for one article, or ``None`` if no text."""
+    num = primary_article_number(article_number)
+    title = get_article_title(num)
+    body = get_article_text(num)
+    if not body:
+        return None
+    segments = _split_gdpr_numbered_segments(body)
+    if not segments:
+        segments = [body.strip()]
+    kept = [s for s in segments if keyword_match_score(s, keywords) > 0]
+    if not kept:
+        kept = [segments[0]]
+    merged = "\n".join(kept)
+    merged = _trim_to_approx_tokens(merged, max_tokens_per_article)
+    return f"--- Article {num}: {title} ---\n{merged}\n"
+
+
+def assemble_targeted_context(
+    articles_ordered: list[str],
+    query_keywords: list[str],
+    *,
+    max_tokens_per_article: int = 300,
+) -> str:
+    """Assemble compact legal context: keyword-scored paragraphs per article, capped length."""
+    parts: list[str] = []
+    for raw in articles_ordered:
+        n = primary_article_number(raw)
+        block = _targeted_body_for_article(
+            n,
+            query_keywords,
+            max_tokens_per_article=max_tokens_per_article,
+        )
+        if block:
+            parts.append(block)
+    return "\n".join(parts)
+
+
 def assemble_context(
     articles: set[str],
     *,

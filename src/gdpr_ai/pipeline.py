@@ -185,21 +185,36 @@ def _articles_from_chunks(chunks: list[RetrievedChunk]) -> list[str]:
     return found
 
 
+def _serialize_chunk_for_prompt(c: RetrievedChunk) -> dict[str, Any]:
+    """JSON-serialize one chunk for reasoning / validation prompts."""
+    return {
+        "chunk_id": c.chunk_id,
+        "text": c.text,
+        "metadata": c.metadata,
+        "scores": {
+            "fused": c.similarity_score,
+            "dense": c.dense_score,
+            "bm25": c.bm25_score,
+        },
+    }
+
+
 def _chunks_for_prompt(chunks: list[RetrievedChunk]) -> str:
-    serializable = [
-        {
-            "chunk_id": c.chunk_id,
-            "text": c.text,
-            "metadata": c.metadata,
-            "scores": {
-                "fused": c.similarity_score,
-                "dense": c.dense_score,
-                "bm25": c.bm25_score,
-            },
-        }
-        for c in chunks
-    ]
-    return json.dumps(serializable, ensure_ascii=False)
+    """Build retrieved-context JSON with primary (semantic) vs supplementary sections."""
+    primary: list[RetrievedChunk] = []
+    supplementary: list[RetrievedChunk] = []
+    for c in chunks:
+        if c.metadata.get("retrieval_source") == "deterministic_map_graph":
+            supplementary.append(c)
+        else:
+            primary.append(c)
+    body = {
+        "=== Retrieved Evidence (primary) ===": [_serialize_chunk_for_prompt(c) for c in primary],
+        "=== Additional Legal Context (supplementary) ===": [
+            _serialize_chunk_for_prompt(c) for c in supplementary
+        ],
+    }
+    return json.dumps(body, ensure_ascii=False)
 
 
 async def reason_report(

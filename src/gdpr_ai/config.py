@@ -62,6 +62,7 @@ class Settings(BaseSettings):
     def _floor_reasoning_max_tokens(cls, v: int) -> int:
         """Avoid truncated JSON when env sets MAX_TOKENS too low for v4-sized reports."""
         return max(v, 8192)
+
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
 
     chroma_collection: str = Field(default="gdpr_ai_chunks", validation_alias="CHROMA_COLLECTION")
@@ -98,6 +99,16 @@ class Settings(BaseSettings):
         default=30000,
         validation_alias="DETERMINISTIC_MAX_CONTEXT_TOKENS",
         ge=2000,
+    )
+    max_deterministic_supplement_articles: int = Field(
+        default=5,
+        validation_alias="MAX_DETERMINISTIC_ARTICLES",
+        ge=0,
+        le=50,
+        description=(
+            "Max GDPR articles injected as full-text supplement when not already "
+            "covered by semantic chunks (deterministic map/graph gaps only)."
+        ),
     )
     deterministic_semantic_fallback: bool = Field(
         default=True,
