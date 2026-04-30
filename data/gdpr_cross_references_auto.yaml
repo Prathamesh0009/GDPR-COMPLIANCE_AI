@@ -17,51 +17,20 @@ cross_references:
     - '51'
   '5':
     references:
-    - '6'
-    - '9'
-    - '23'
-    - '24'
-    - '32'
-    - '83'
     - '89'
-    description: Principles reference lawful basis, security, and penalties
   '6':
     references:
-    - '5'
-    - '7'
-    - '8'
     - '9'
     - '10'
-    - '13'
-    - '14'
-    - '21'
-    - '22'
     - '23'
-    - '49'
-    - '85'
-    - '86'
-    - '87'
-    - '88'
-    - '89'
-    description: Lawful bases and linked obligations
   '7':
-    references:
-    - '6'
-    - '8'
-    description: Consent conditions
+    references: []
   '8':
     references:
     - '6'
-    - '7'
-    description: Children consent
   '9':
     references:
-    - '6'
-    - '22'
-    - '35'
-    - '49'
     - '89'
-    description: Special categories linkage
   '10':
     references:
     - '6'
@@ -92,26 +61,19 @@ cross_references:
     - '9'
     - '22'
     - '46'
-    - '47'
     - '49'
-    description: Information when collected from data subject
   '14':
     references:
     - '6'
     - '9'
     - '22'
     - '46'
-    - '47'
     - '49'
     - '89'
-    description: Information when not obtained from data subject
   '15':
     references:
-    - '12'
-    - '20'
     - '22'
     - '46'
-    description: Access modalities
   '16':
     references: []
   '17':
@@ -121,7 +83,6 @@ cross_references:
     - '9'
     - '21'
     - '89'
-    description: Erasure linkage
   '18':
     references:
     - '21'
@@ -135,19 +96,13 @@ cross_references:
     - '6'
     - '9'
     - '17'
-    description: Portability linkage
   '21':
     references:
     - '6'
     - '89'
-    description: Object linkage
   '22':
     references:
     - '9'
-    - '13'
-    - '14'
-    - '35'
-    description: Automated decisions linkage
   '23':
     references:
     - '5'
@@ -165,25 +120,14 @@ cross_references:
     - '34'
   '24':
     references:
-    - '5'
-    - '25'
-    - '30'
-    - '32'
     - '40'
     - '42'
-    description: Controller responsibility
   '25':
     references:
-    - '24'
-    - '32'
     - '42'
-    description: Data protection by design
   '26':
     references:
     - '13'
-    - '24'
-    - '28'
-    description: Joint controllers
   '27':
     references:
     - '3'
@@ -191,9 +135,6 @@ cross_references:
     - '10'
   '28':
     references:
-    - '24'
-    - '26'
-    - '29'
     - '32'
     - '33'
     - '34'
@@ -204,62 +145,43 @@ cross_references:
     - '63'
     - '82'
     - '93'
-    description: Processor
   '29':
     references: []
   '30':
     references:
-    - '5'
     - '9'
     - '10'
-    - '24'
     - '32'
     - '49'
-    description: Records of processing
   '31':
     references: []
   '32':
     references:
-    - '5'
-    - '24'
-    - '28'
     - '40'
     - '42'
-    description: Security of processing
   '33':
     references:
-    - '34'
     - '55'
-    description: Breach notification authority
   '34':
     references:
-    - '32'
     - '33'
-    description: Breach communication to subject
   '35':
     references:
     - '6'
     - '9'
     - '10'
-    - '22'
-    - '36'
     - '40'
     - '63'
     - '68'
-    description: DPIA
   '36':
     references:
     - '35'
-    - '57'
     - '58'
-    description: Prior consultation
   '37':
     references:
     - '9'
     - '10'
-    - '38'
     - '39'
-    description: DPO designation
   '38':
     references:
     - '39'
@@ -301,56 +223,40 @@ cross_references:
     - '92'
     - '93'
   '44':
-    references:
-    - '45'
-    - '46'
-    - '47'
-    - '48'
-    - '49'
-    description: Transfers - general principle
+    references: []
   '45':
     references:
     - '25'
-    - '44'
     - '46'
     - '47'
     - '48'
     - '49'
     - '93'
-    description: Adequacy
   '46':
     references:
     - '26'
     - '40'
     - '42'
-    - '44'
     - '45'
     - '47'
-    - '49'
     - '63'
     - '93'
-    description: Appropriate safeguards
   '47':
     references:
     - '13'
     - '22'
     - '37'
-    - '46'
     - '63'
     - '79'
     - '93'
-    description: BCRs
   '48':
     references: []
   '49':
     references:
     - '13'
     - '30'
-    - '44'
     - '45'
     - '46'
-    - '47'
-    description: Derogations
   '50':
     references: []
   '51':
@@ -509,7 +415,6 @@ cross_references:
   '83':
     references:
     - '5'
-    - '6'
     - '8'
     - '12'
     - '13'
@@ -523,7 +428,6 @@ cross_references:
     - '21'
     - '22'
     - '25'
-    - '32'
     - '40'
     - '41'
     - '42'
@@ -534,7 +438,6 @@ cross_references:
     - '48'
     - '49'
     - '58'
-    description: Penalties - indicative links
   '84':
     references:
     - '83'
@@ -577,163 +480,3 @@ cross_references:
     references: []
   '99':
     references: []
-bdsg_cross_references:
-  '22':
-    references_gdpr:
-    - '9'
-    description: BDSG special categories and GDPR Art 9
-  '26':
-    references_gdpr:
-    - '6'
-    - '9'
-    - '88'
-    description: BDSG employment provisions
-  § 1:
-    references_gdpr:
-    - '1'
-    - '2'
-  § 4:
-    references_gdpr:
-    - '13'
-  § 14:
-    references_gdpr:
-    - '55'
-  § 15:
-    references_gdpr:
-    - '58'
-  § 16:
-    references_gdpr:
-    - '10'
-    - '58'
-  § 18:
-    references_gdpr:
-    - '85'
-  § 19:
-    references_gdpr:
-    - '4'
-    - '56'
-    - '60'
-    - '65'
-  § 20:
-    references_gdpr:
-    - '78'
-  § 22:
-    references_gdpr:
-    - '9'
-  § 23:
-    references_gdpr:
-    - '9'
-  § 24:
-    references_gdpr:
-    - '9'
-  § 25:
-    references_gdpr:
-    - '9'
-  § 26:
-    references_gdpr:
-    - '5'
-    - '7'
-    - '9'
-    - '88'
-  § 27:
-    references_gdpr:
-    - '9'
-    - '15'
-  § 28:
-    references_gdpr:
-    - '9'
-    - '15'
-    - '16'
-    - '18'
-    - '20'
-  § 29:
-    references_gdpr:
-    - '13'
-    - '14'
-    - '15'
-    - '34'
-    - '58'
-  § 32:
-    references_gdpr:
-    - '13'
-    - '23'
-  § 33:
-    references_gdpr:
-    - '14'
-    - '23'
-  § 34:
-    references_gdpr:
-    - '15'
-    - '18'
-  § 35:
-    references_gdpr:
-    - '17'
-    - '18'
-  § 36:
-    references_gdpr:
-    - '21'
-  § 37:
-    references_gdpr:
-    - '4'
-    - '22'
-  § 38:
-    references_gdpr:
-    - '35'
-    - '37'
-  § 39:
-    references_gdpr:
-    - '43'
-  § 40:
-    references_gdpr:
-    - '4'
-    - '6'
-    - '38'
-  § 41:
-    references_gdpr:
-    - '83'
-  § 42:
-    references_gdpr:
-    - '33'
-    - '34'
-  § 43:
-    references_gdpr:
-    - '33'
-    - '34'
-  § 44:
-    references_gdpr:
-    - '27'
-  § 46:
-    references_gdpr:
-    - '41'
-  § 78:
-    references_gdpr:
-    - '36'
-  § 79:
-    references_gdpr:
-    - '36'
-  § 80:
-    references_gdpr:
-    - '36'
-  § 85:
-    references_gdpr:
-    - '13'
-  § 86:
-    references_gdpr:
-    - '9'
-    - '13'
-    - '14'
-    - '15'
-    - '16'
-ttdsg_cross_references:
-  '25':
-    references_gdpr:
-    - '6'
-    - '7'
-    description: TTDSG and consent/lawfulness
-  § 29:
-    references_gdpr:
-    - '10'
-    - '58'
-  § 30:
-    references_gdpr:
-    - '10'
