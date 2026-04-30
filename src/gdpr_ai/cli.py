@@ -63,7 +63,7 @@ def _render_report(report: AnalysisReport) -> None:
         for c in report.citations:
             console.print(f"- {c}")
 
-    console.print(f"\n[dim]{report.disclaimer}[/dim]")
+    console.print(f"\n[dim]{report.disclaimer or ''}[/dim]")
 
 
 @app.command("analyze")

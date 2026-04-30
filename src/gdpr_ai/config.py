@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -56,6 +56,12 @@ class Settings(BaseSettings):
     )
     max_tokens: int = Field(default=16384, validation_alias="MAX_TOKENS")
     max_tokens_validate: int = Field(default=12288, validation_alias="MAX_TOKENS_VALIDATE")
+
+    @field_validator("max_tokens", "max_tokens_validate")
+    @classmethod
+    def _floor_reasoning_max_tokens(cls, v: int) -> int:
+        """Avoid truncated JSON when env sets MAX_TOKENS too low for v4-sized reports."""
+        return max(v, 8192)
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
 
     chroma_collection: str = Field(default="gdpr_ai_chunks", validation_alias="CHROMA_COLLECTION")

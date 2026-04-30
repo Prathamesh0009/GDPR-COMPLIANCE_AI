@@ -74,7 +74,7 @@ async def verify_completeness(
         articles_used=", ".join(articles_used) if articles_used else "(none)",
         mode=mode,
     )
-    cap = 4096
+    cap = 8192
     last_exc: Exception | None = None
     for attempt in range(3):
         try:

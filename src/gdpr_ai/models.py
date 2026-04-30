@@ -25,7 +25,7 @@ class AnalysisConfidence(BaseModel):
     medium_confidence_claims: int = 0
     low_confidence_claims: int = 0
     uncertain_claims: int = 0
-    disclaimer: str = ""
+    disclaimer: str | None = None
 
 
 class Scenario(BaseModel):
@@ -95,5 +95,5 @@ class AnalysisReport(BaseModel):
         default_factory=list,
         description="Articles/topics that seem relevant but were not grounded in chunks.",
     )
-    disclaimer: str = ""
+    disclaimer: str | None = None
     analysis_confidence: AnalysisConfidence | None = None
