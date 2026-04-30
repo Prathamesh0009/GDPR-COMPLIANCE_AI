@@ -51,6 +51,13 @@ from eval_scoring import (  # noqa: E402
 
 console = Console()
 GOLD_PATH = ROOT / "gold" / "test_scenarios.yaml"
+DEFAULT_CORE_SCENARIO_IDS = (
+    "SC-V-001",
+    "SC-V-002",
+    "SC-V-003",
+    "SC-C-001",
+    "SC-C-002",
+)
 DEFAULT_OUT = ROOT / "logs" / "eval_results.json"
 REPLAY_OUT_PATH = ROOT / "logs" / "eval_replay.json"
 BASELINE_PATH = ROOT / "gold" / "baseline.json"
@@ -80,14 +87,30 @@ def filter_scenarios(
 
 
 def _parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Unified gold eval (violation + compliance).")
+    p = argparse.ArgumentParser(
+        description=(
+            "Unified gold eval (violation + compliance). "
+            "Default: 5 core scenarios (fast, ~€0.40). "
+            "Use --all for the full ~50-scenario suite (~€3.84), or --scenarios for explicit ids."
+        ),
+    )
     p.add_argument(
         "--mode",
         type=str,
         default="",
         help="violation_analysis | compliance_assessment",
     )
-    p.add_argument("--scenarios", type=str, default="", help="Comma-separated ids")
+    p.add_argument(
+        "--all",
+        action="store_true",
+        help="Run all gold scenarios (full suite, ~€3.84). Ignored if --scenarios is set.",
+    )
+    p.add_argument(
+        "--scenarios",
+        type=str,
+        default="",
+        help="Comma-separated ids (e.g. SC-V-001,SC-V-005). Overrides default slice and --all.",
+    )
     p.add_argument("--difficulty", type=str, default="", help="easy | medium | hard")
     p.add_argument("--category", type=str, default="", help="Category label")
     p.add_argument("--dry-run", action="store_true", help="Validate YAML only; no LLM")
@@ -485,7 +508,12 @@ async def _run_live(rows: list[dict[str, Any]]) -> EvalReport:
 async def _amain() -> int:
     args = _parse_args()
     rows = load_scenarios(GOLD_PATH)
-    ids_list = [s.strip() for s in args.scenarios.split(",") if s.strip()] or None
+    if args.scenarios.strip():
+        ids_list = [s.strip() for s in args.scenarios.split(",") if s.strip()]
+    elif args.all:
+        ids_list = None
+    else:
+        ids_list = list(DEFAULT_CORE_SCENARIO_IDS)
     rows = filter_scenarios(
         rows,
         mode=args.mode or None,

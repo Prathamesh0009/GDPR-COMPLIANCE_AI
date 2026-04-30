@@ -17,6 +17,41 @@ from gdpr_ai.retrieval.cross_ref_graph import expand_articles
 logger = logging.getLogger(__name__)
 
 
+def _article_nums_from_chunks(chunks: list[RetrievedChunk]) -> set[str]:
+    """Extract primary numeric article ids referenced in chunk metadata."""
+    out: set[str] = set()
+    for c in chunks:
+        lbl = str(c.metadata.get("article_number", ""))
+        m = re.search(r"(\d+)", lbl)
+        if m:
+            out.add(m.group(1))
+        assembled = str(c.metadata.get("assembled_articles", ""))
+        for part in re.split(r"[\n,]+", assembled):
+            p = part.strip()
+            if p.isdigit():
+                out.add(p)
+    return out
+
+
+def _dedupe_chunks_by_id(chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
+    """Preserve order; drop duplicate chunk ids."""
+    seen: set[str] = set()
+    out: list[RetrievedChunk] = []
+    for c in chunks:
+        if c.chunk_id in seen:
+            continue
+        seen.add(c.chunk_id)
+        out.append(c)
+    return out
+
+
+def _with_retrieval_source(chunk: RetrievedChunk, source: str) -> RetrievedChunk:
+    """Return a copy of chunk with ``retrieval_source`` set (explainability)."""
+    meta = dict(chunk.metadata)
+    meta["retrieval_source"] = source
+    return chunk.model_copy(update={"metadata": meta})
+
+
 @dataclass
 class RetrievalResult:
     """Outputs of the v4 retrieval path plus explainability metadata."""
@@ -104,7 +139,14 @@ def retrieve_deterministic(
     graph_depth: int | None = None,
     max_context_tokens: int | None = None,
 ) -> RetrievalResult:
-    """Layer 1–3 orchestration: map → expand → optional semantic merge."""
+    """Layer 1–3 orchestration: map → expand → always merge hybrid semantic when enabled.
+
+    When ``use_semantic_fallback`` is True (default from ``retrieve()``), runs full ``top_k``
+    semantic retrieval and unions it with deterministic map/graph articles. Deterministic
+    full-text chunks are added only for articles not already covered by semantic chunk
+    metadata, so chunk/RAG-shaped context is preserved while map-only articles are
+    supplemented with assembled GDPR full text.
+    """
     k = top_k if top_k is not None else settings.top_k
     depth = settings.deterministic_graph_depth if graph_depth is None else graph_depth
     max_tok = (
@@ -120,14 +162,25 @@ def retrieve_deterministic(
     graph_only = expanded - mapped_norm
     all_art = set(mapped_norm) | set(expanded)
 
-    priority_list = sorted(mapped_norm, key=int) + sorted(graph_only, key=int)
+    semantic: list[RetrievedChunk] = []
+    sem_arts: set[str] = set()
+    if use_semantic_fallback:
+        semantic = semantic_retrieve_fn(query, topics, entities, top_k=k)
+        sem_arts = _article_nums_from_chunks(semantic)
+
+    all_article_union = all_art | sem_arts
+    sem_only = sem_arts - all_art
+    priority_list = (
+        sorted(mapped_norm, key=int)
+        + sorted(graph_only, key=int)
+        + sorted(sem_only, key=int)
+    )
 
     full_block = assemble_context(
-        all_art,
+        all_article_union,
         max_tokens=max_tok,
         priority_order=priority_list,
     )
-    ft_chunks = _fulltext_chunks_for_articles(all_art, tier="map+graph", block=full_block)
 
     meta: dict[str, Any] = {
         "mapped_article_count": len(mapped_norm),
@@ -135,24 +188,37 @@ def retrieve_deterministic(
         "recital_count": len(recitals),
     }
 
-    semantic: list[RetrievedChunk] = []
-    sem_arts: set[str] = set()
-    if use_semantic_fallback and settings.deterministic_semantic_fallback:
-        semantic = semantic_retrieve_fn(query, topics, entities, top_k=max(6, k // 2))
-        for c in semantic:
-            lbl = str(c.metadata.get("article_number", ""))
-            m = re.search(r"(\d+)", lbl)
-            if m:
-                sem_arts.add(m.group(1))
+    article_sources: dict[str, list[str]] = {}
+    for a in sem_arts:
+        article_sources.setdefault(a, []).append("semantic")
+    for a in mapped_norm:
+        article_sources.setdefault(a, []).append("map")
+    for a in graph_only:
+        article_sources.setdefault(a, []).append("graph")
+    for key, paths in article_sources.items():
+        article_sources[key] = sorted(frozenset(paths))
+    meta["article_sources"] = article_sources
 
-    out_chunks = (ft_chunks + semantic)[:k]
+    extra_arts = all_art - sem_arts
+    supp_chunks: list[RetrievedChunk] = []
+    if extra_arts:
+        supp_block = assemble_context(
+            extra_arts,
+            max_tokens=max_tok,
+            priority_order=sorted(extra_arts, key=int),
+        )
+        raw_supp = _fulltext_chunks_for_articles(extra_arts, tier="map+graph", block=supp_block)
+        supp_chunks = [_with_retrieval_source(c, "deterministic_map_graph") for c in raw_supp]
+
+    semantic_tagged = [_with_retrieval_source(c, "semantic") for c in semantic]
+    out_chunks = _dedupe_chunks_by_id(semantic_tagged + supp_chunks)
 
     return RetrievalResult(
         chunks=out_chunks,
         articles_from_map=mapped_norm,
         articles_from_graph=graph_only,
         articles_from_semantic=sem_arts,
-        all_articles=all_art | sem_arts,
+        all_articles=all_article_union,
         full_text_context=full_block,
         recitals=set(recitals),
         retrieval_metadata=meta,

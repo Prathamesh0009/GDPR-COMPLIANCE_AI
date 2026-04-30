@@ -78,8 +78,15 @@ def test_filter_category_consent() -> None:
     assert all(str(r.get("category", "")) == "consent" for r in f)
 
 
-def test_dry_run_subprocess_all_parse() -> None:
+def test_dry_run_subprocess_default_core_five() -> None:
     cmd = [sys.executable, str(ROOT / "tests" / "run_eval.py"), "--dry-run"]
+    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True, check=False)
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+    assert "Dry-run OK for 5 scenario" in proc.stdout
+
+
+def test_dry_run_subprocess_all_parse() -> None:
+    cmd = [sys.executable, str(ROOT / "tests" / "run_eval.py"), "--dry-run", "--all"]
     proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True, check=False)
     assert proc.returncode == 0, proc.stderr + proc.stdout
 

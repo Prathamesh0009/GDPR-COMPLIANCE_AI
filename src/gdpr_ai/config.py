@@ -102,7 +102,11 @@ class Settings(BaseSettings):
     deterministic_semantic_fallback: bool = Field(
         default=True,
         validation_alias="DETERMINISTIC_SEMANTIC_FALLBACK",
-        description="Merge hybrid Chroma+BM25 results after deterministic full-text chunk.",
+        description=(
+            "Deprecated: ignored. Hybrid semantic search is always merged when "
+            "DETERMINISTIC_RETRIEVAL is enabled. Set DETERMINISTIC_RETRIEVAL=false "
+            "for semantic-only."
+        ),
     )
     verification_enabled: bool = Field(
         default=True,

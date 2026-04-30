@@ -207,7 +207,10 @@ def retrieve(
         entities,
         semantic_retrieve_fn=semantic_retrieve,
         top_k=top_k,
-        use_semantic_fallback=settings.deterministic_semantic_fallback,
+        # Always merge full top_k hybrid semantic results with deterministic map/graph;
+        # DETERMINISTIC_SEMANTIC_FALLBACK no longer disables semantic (use
+        # DETERMINISTIC_RETRIEVAL=false for semantic-only).
+        use_semantic_fallback=True,
     )
     if not res.chunks:
         try:
