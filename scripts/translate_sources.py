@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Translate German BDSG/TTDSG sections to English using Claude Haiku."""
+
 from __future__ import annotations
 
 import asyncio
@@ -44,16 +45,14 @@ def _parse_translations_json(raw: str, expected_n: int) -> list[str]:
     if not isinstance(translations, list):
         raise ValueError("Missing or invalid 'translations' array")
     if len(translations) != expected_n:
-        raise ValueError(
-            f"Translation count mismatch: got {len(translations)}, need {expected_n}"
-        )
+        raise ValueError(f"Translation count mismatch: got {len(translations)}, need {expected_n}")
     return [str(t).strip() for t in translations]
 
 
 async def translate_batch(client: AsyncAnthropic, model: str, sections: list[dict]) -> list[str]:
     """Translate a batch of German sections; returns English paragraphs in order."""
     numbered = "\n\n".join(
-        f"[[ITEM_{i+1}]]\n{s['section_number']} {s['title']}\n{s['text_de']}"
+        f"[[ITEM_{i + 1}]]\n{s['section_number']} {s['title']}\n{s['text_de']}"
         for i, s in enumerate(sections)
     )
     base_prompt = (
@@ -85,7 +84,12 @@ async def translate_batch(client: AsyncAnthropic, model: str, sections: list[dic
         try:
             return _parse_translations_json(last_raw, len(sections))
         except (json.JSONDecodeError, ValueError) as exc:
-            logger.warning("Batch parse failed attempt %s/%s: %s", attempt + 1, _MAX_BATCH_RETRIES + 1, exc)
+            logger.warning(
+                "Batch parse failed attempt %s/%s: %s",
+                attempt + 1,
+                _MAX_BATCH_RETRIES + 1,
+                exc,
+            )
             if attempt < _MAX_BATCH_RETRIES:
                 await asyncio.sleep(0.8 * (attempt + 1))
     logger.error("Model output (truncated): %s", last_raw[:2000])

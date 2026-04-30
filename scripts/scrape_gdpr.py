@@ -6,6 +6,7 @@ challenge (common for unattended clients), falls back to gdpr-info.eu per-articl
 and per-recital pages. Mirror text is unofficial consolidation; metadata records
 the page URL and publisher for attribution.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -22,9 +23,7 @@ from bs4 import BeautifulSoup, Tag
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-GDPR_URL = (
-    "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679"
-)
+GDPR_URL = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679"
 MIRROR_ARTICLE_TEMPLATE = "https://gdpr-info.eu/art-{n}-gdpr/"
 MIRROR_RECITAL_TEMPLATE = "https://gdpr-info.eu/recitals/no-{n}/"
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,7 +105,7 @@ def _is_waf_or_non_lex_html(html: str) -> bool:
     """Return True when the response is not usable EUR-Lex consolidated HTML."""
     if "AwsWafIntegration" in html:
         return True
-    if "div.eli-container" not in html and "id=\"art_1\"" not in html:
+    if "div.eli-container" not in html and 'id="art_1"' not in html:
         return True
     return False
 
@@ -121,7 +120,11 @@ def _strip_mirror_footer(content: Tag) -> None:
             return
 
 
-def parse_gdpr_info_article_html(html: str, article_num: int, page_url: str) -> dict[str, Any] | None:
+def parse_gdpr_info_article_html(
+    html: str,
+    article_num: int,
+    page_url: str,
+) -> dict[str, Any] | None:
     """Parse a single gdpr-info.eu article page into our article record shape."""
     soup = BeautifulSoup(html, "lxml")
     entry = soup.select_one("div.entry-content")
@@ -147,7 +150,11 @@ def parse_gdpr_info_article_html(html: str, article_num: int, page_url: str) -> 
     }
 
 
-def parse_gdpr_info_recital_html(html: str, recital_num: int, page_url: str) -> dict[str, Any] | None:
+def parse_gdpr_info_recital_html(
+    html: str,
+    recital_num: int,
+    page_url: str,
+) -> dict[str, Any] | None:
     """Parse a single gdpr-info.eu recital page."""
     soup = BeautifulSoup(html, "lxml")
     entry = soup.select_one("div.entry-content")
@@ -171,7 +178,9 @@ async def fetch_html(client: httpx.AsyncClient) -> str:
     return resp.text
 
 
-async def fetch_mirror_corpus(client: httpx.AsyncClient) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+async def fetch_mirror_corpus(
+    client: httpx.AsyncClient,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Download articles 1–99 and recitals 1–173 from gdpr-info.eu."""
     articles: list[dict[str, Any]] = []
     recitals: list[dict[str, Any]] = []
@@ -215,7 +224,8 @@ async def main() -> None:
         articles, recitals = parse_gdpr_html(html)
         if _is_waf_or_non_lex_html(html) or len(articles) < 10:
             logger.warning(
-                "EUR-Lex HTML missing or blocked (WAF). Using gdpr-info.eu mirror (%s articles parsed).",
+                "EUR-Lex HTML missing or blocked (WAF). "
+                "Using gdpr-info.eu mirror (%s articles parsed).",
                 len(articles),
             )
             articles, recitals = await fetch_mirror_corpus(client)
