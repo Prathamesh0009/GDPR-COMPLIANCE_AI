@@ -2,9 +2,30 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+
+
+class ConfidenceLevel(StrEnum):
+    """Per-claim confidence tier for legal grounding (v4)."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    UNCERTAIN = "uncertain"
+
+
+class AnalysisConfidence(BaseModel):
+    """Aggregate confidence summary for an analysis report."""
+
+    overall_score: float = Field(ge=0.0, le=1.0, default=1.0)
+    high_confidence_claims: int = 0
+    medium_confidence_claims: int = 0
+    low_confidence_claims: int = 0
+    uncertain_claims: int = 0
+    disclaimer: str = ""
 
 
 class Scenario(BaseModel):
@@ -53,6 +74,9 @@ class ArticleViolation(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     supporting_chunk_ids: list[str] = Field(default_factory=list)
     source_url: str = ""
+    confidence_level: ConfidenceLevel | None = None
+    source_articles: list[str] = Field(default_factory=list)
+    confidence_notes: str = ""
 
 
 class AnalysisReport(BaseModel):
@@ -72,3 +96,4 @@ class AnalysisReport(BaseModel):
         description="Articles/topics that seem relevant but were not grounded in chunks.",
     )
     disclaimer: str = ""
+    analysis_confidence: AnalysisConfidence | None = None

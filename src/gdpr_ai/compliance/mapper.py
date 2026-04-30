@@ -186,7 +186,8 @@ def map_articles(data_map: DataMap) -> dict[str, list[RetrievedChunk]]:
     for store in data_map.storage:
         q = (
             f"Security and storage limitation for location {store.location} "
-            f"({store.country or 'unspecified'}), retention {store.retention_period or 'unspecified'}."
+            f"({store.country or 'unspecified'}), retention "
+            f"{store.retention_period or 'unspecified'}."
         )
         article_map[f"storage:{store.location}"] = _retrieve_merged(q, topics_ctx)
 

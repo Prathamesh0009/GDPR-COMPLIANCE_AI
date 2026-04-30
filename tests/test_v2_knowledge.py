@@ -85,6 +85,7 @@ def test_retrieve_v1_unchanged(monkeypatch: pytest.MonkeyPatch) -> None:
     bm25_path.exists.return_value = False
     monkeypatch.setattr("gdpr_ai.retriever.settings.chroma_path", chroma_path)
     monkeypatch.setattr("gdpr_ai.retriever.settings.bm25_index_path", bm25_path)
+    monkeypatch.setattr("gdpr_ai.retriever.settings.deterministic_retrieval_enabled", False)
     monkeypatch.setattr(
         "gdpr_ai.retriever.embed_texts",
         lambda model_name, texts, batch_size=16: [[0.0, 0.0, 0.0]] * len(texts),

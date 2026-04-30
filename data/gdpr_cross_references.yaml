@@ -1,0 +1,206 @@
+cross_references:
+  '5':
+    references:
+    - '6'
+    - '9'
+    - '23'
+    - '24'
+    - '32'
+    - '83'
+    description: Principles reference lawful basis, security, and penalties
+  '6':
+    references:
+    - '5'
+    - '7'
+    - '8'
+    - '9'
+    - '13'
+    - '14'
+    - '21'
+    - '22'
+    - '23'
+    - '49'
+    - '85'
+    - '86'
+    - '87'
+    - '88'
+    - '89'
+    description: Lawful bases and linked obligations
+  '7':
+    references:
+    - '6'
+    - '8'
+    description: Consent conditions
+  '8':
+    references:
+    - '6'
+    - '7'
+    description: Children consent
+  '9':
+    references:
+    - '6'
+    - '22'
+    - '35'
+    - '49'
+    description: Special categories linkage
+  '13':
+    references:
+    - '6'
+    - '9'
+    - '22'
+    - '46'
+    - '47'
+    - '49'
+    description: Information when collected from data subject
+  '14':
+    references:
+    - '6'
+    - '9'
+    - '22'
+    - '46'
+    - '47'
+    - '49'
+    description: Information when not obtained from data subject
+  '15':
+    references:
+    - '12'
+    - '20'
+    description: Access modalities
+  '17':
+    references:
+    - '6'
+    - '9'
+    - '21'
+    description: Erasure linkage
+  '20':
+    references:
+    - '6'
+    - '17'
+    description: Portability linkage
+  '21':
+    references:
+    - '6'
+    description: Object linkage
+  '22':
+    references:
+    - '9'
+    - '13'
+    - '14'
+    - '35'
+    description: Automated decisions linkage
+  '24':
+    references:
+    - '5'
+    - '25'
+    - '30'
+    - '32'
+    description: Controller responsibility
+  '25':
+    references:
+    - '24'
+    - '32'
+    description: Data protection by design
+  '26':
+    references:
+    - '24'
+    - '28'
+    description: Joint controllers
+  '28':
+    references:
+    - '24'
+    - '26'
+    - '29'
+    - '32'
+    description: Processor
+  '30':
+    references:
+    - '5'
+    - '24'
+    description: Records of processing
+  '32':
+    references:
+    - '5'
+    - '24'
+    - '28'
+    description: Security of processing
+  '33':
+    references:
+    - '34'
+    - '55'
+    description: Breach notification authority
+  '34':
+    references:
+    - '33'
+    - '32'
+    description: Breach communication to subject
+  '35':
+    references:
+    - '9'
+    - '22'
+    - '36'
+    description: DPIA
+  '36':
+    references:
+    - '35'
+    - '57'
+    - '58'
+    description: Prior consultation
+  '37':
+    references:
+    - '38'
+    - '39'
+    description: DPO designation
+  '44':
+    references:
+    - '45'
+    - '46'
+    - '47'
+    - '48'
+    - '49'
+    description: Transfers - general principle
+  '45':
+    references:
+    - '44'
+    - '46'
+    description: Adequacy
+  '46':
+    references:
+    - '44'
+    - '45'
+    - '47'
+    - '49'
+    description: Appropriate safeguards
+  '47':
+    references:
+    - '46'
+    description: BCRs
+  '49':
+    references:
+    - '44'
+    - '45'
+    - '46'
+    - '47'
+    description: Derogations
+  '83':
+    references:
+    - '5'
+    - '6'
+    - '32'
+    description: Penalties - indicative links
+bdsg_cross_references:
+  '22':
+    references_gdpr:
+    - '9'
+    description: BDSG special categories and GDPR Art 9
+  '26':
+    references_gdpr:
+    - '6'
+    - '9'
+    - '88'
+    description: BDSG employment provisions
+ttdsg_cross_references:
+  '25':
+    references_gdpr:
+    - '6'
+    - '7'
+    description: TTDSG and consent/lawfulness

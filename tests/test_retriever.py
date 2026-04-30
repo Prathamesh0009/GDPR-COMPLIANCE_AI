@@ -48,6 +48,7 @@ def test_retrieve_deduplicates_identical_text_prefixes(monkeypatch) -> None:
     bm25_path.exists.return_value = False
     monkeypatch.setattr("gdpr_ai.retriever.settings.chroma_path", chroma_path)
     monkeypatch.setattr("gdpr_ai.retriever.settings.bm25_index_path", bm25_path)
+    monkeypatch.setattr("gdpr_ai.retriever.settings.deterministic_retrieval_enabled", False)
 
     fake_chunks = [
         RetrievedChunk(

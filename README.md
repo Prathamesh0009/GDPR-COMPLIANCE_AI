@@ -233,6 +233,10 @@ Every chunk carries `source`, `source_url`, and `license` metadata for traceabil
 - **ePrivacy gaps** — cookie/electronic marketing scenarios may be incomplete unless TTDSG chunks cover the pattern
 - **Latency** — full runs are typically **20–190s** depending on mode and complexity (multi-stage LLM pipeline)
 
+## Retrieval (v4 accuracy path)
+
+Violation analysis now defaults to **deterministic article mapping** (`data/gdpr_article_map.yaml`) plus **cross-reference expansion** (`data/gdpr_cross_references.yaml`), then a **single assembled full-text context chunk** when `data/gdpr_articles_fulltext.yaml` is populated (otherwise text is filled from `data/raw/gdpr_articles.json` after scraping). Hybrid Chroma + BM25 still runs as a **fallback** merge. Set `DETERMINISTIC_RETRIEVAL=false` to use legacy semantic-only retrieval. After scraping, run `uv run python scripts/export_gdpr_fulltext_yaml.py` to build the YAML article store. Eval baselines: run `uv run python tests/run_eval.py` before/after and compare with `uv run python tests/compare_eval.py`.
+
 ---
 
 ## Product roadmap

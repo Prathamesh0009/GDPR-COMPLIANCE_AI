@@ -1,0 +1,16 @@
+# add-on appended after compliance_assess prompt body (do not edit compliance_assess.txt)
+
+For EVERY finding, add optional fields:
+- "confidence_level": "high" | "medium" | "low" | "uncertain"
+- "source_articles": list of citations matching chunk evidence
+- "confidence_notes": brief rationale
+
+Add top-level:
+- "analysis_confidence": {{
+    "overall_score": 0.0-1.0,
+    "high_confidence_claims": 0,
+    "medium_confidence_claims": 0,
+    "low_confidence_claims": 0,
+    "uncertain_claims": 0,
+    "disclaimer": "string when any finding is uncertain"
+  }}

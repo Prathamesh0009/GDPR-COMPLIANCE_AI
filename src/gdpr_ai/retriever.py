@@ -63,13 +63,13 @@ def _topic_overlap(meta_tags: str, topics: Iterable[str]) -> bool:
     return bool(tags & want)
 
 
-def retrieve(
+def semantic_retrieve(
     query: str,
     topics: ClassifiedTopics,
     entities: ExtractedEntities,
     top_k: int | None = None,
 ) -> list[RetrievedChunk]:
-    """Retrieve top-k chunks using dense search fused with BM25 when available."""
+    """Retrieve top-k chunks using dense search fused with BM25 when available (v1/v2 baseline)."""
     k = top_k if top_k is not None else settings.top_k
     chroma_dir = settings.chroma_path
     if not chroma_dir.exists():
@@ -188,6 +188,33 @@ def retrieve(
         if len(out) >= k:
             break
     return out
+
+
+def retrieve(
+    query: str,
+    topics: ClassifiedTopics,
+    entities: ExtractedEntities,
+    top_k: int | None = None,
+) -> list[RetrievedChunk]:
+    """Primary retrieval: deterministic map + graph + full-text, then optional hybrid fallback."""
+    from gdpr_ai.retrieval.deterministic_retriever import retrieve_deterministic
+
+    if not settings.deterministic_retrieval_enabled:
+        return semantic_retrieve(query, topics, entities, top_k=top_k)
+    res = retrieve_deterministic(
+        query,
+        topics,
+        entities,
+        semantic_retrieve_fn=semantic_retrieve,
+        top_k=top_k,
+        use_semantic_fallback=settings.deterministic_semantic_fallback,
+    )
+    if not res.chunks:
+        try:
+            return semantic_retrieve(query, topics, entities, top_k=top_k)
+        except KnowledgeBaseError:
+            return []
+    return res.chunks
 
 
 def retrieve_gdpr_chunks_by_article_numbers(

@@ -1,0 +1,851 @@
+topics:
+  consent:
+    description: Consent as a legal basis for processing
+    gdpr_articles:
+    - 5(1)(a)
+    - 6(1)(a)
+    - '7'
+    - '8'
+    - 9(2)(a)
+    gdpr_recitals:
+    - '32'
+    - '38'
+    - '42'
+    - '43'
+    bdsg_sections: []
+    ttdsg_sections:
+    - '25'
+    edpb_guidelines:
+    - consent_guidelines_05_2020
+    keywords:
+    - consent
+    - opt-in
+    - opt-out
+    - withdraw consent
+    - parental consent
+    - child consent
+    - explicit consent
+    - freely given
+  legal_basis:
+    description: Lawful bases for processing personal data
+    gdpr_articles:
+    - 5(1)(a)
+    - '6'
+    - '9'
+    - '10'
+    gdpr_recitals:
+    - '39'
+    - '40'
+    - '41'
+    - '42'
+    - '43'
+    - '44'
+    - '45'
+    - '46'
+    - '47'
+    - '48'
+    - '49'
+    - '50'
+    - '51'
+    - '52'
+    - '53'
+    - '54'
+    - '55'
+    - '56'
+    bdsg_sections:
+    - '26'
+    ttdsg_sections: []
+    edpb_guidelines: []
+    keywords:
+    - legal basis
+    - lawful basis
+    - legitimate interest
+    - contract
+    - legal obligation
+    - vital interest
+    - public interest
+    - consent
+  data_breach:
+    description: Personal data breach notification and handling
+    gdpr_articles:
+    - '33'
+    - '34'
+    gdpr_recitals:
+    - '85'
+    - '86'
+    - '87'
+    - '88'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - data breach
+    - breach notification
+    - security incident
+    - data leak
+    - unauthorized access
+    - 72 hours
+    edpb_guidelines: []
+  dpia:
+    description: Data Protection Impact Assessment
+    gdpr_articles:
+    - '35'
+    - '36'
+    gdpr_recitals:
+    - '84'
+    - '89'
+    - '90'
+    - '91'
+    - '92'
+    - '93'
+    - '94'
+    - '95'
+    bdsg_sections: []
+    ttdsg_sections: []
+    edpb_guidelines:
+    - dpia_guidelines_wp248
+    keywords:
+    - dpia
+    - impact assessment
+    - data protection impact
+    - high risk
+    - systematic monitoring
+    - large scale
+    - prior consultation
+  international_transfer:
+    description: Transfer of personal data to third countries
+    gdpr_articles:
+    - '44'
+    - '45'
+    - '46'
+    - '47'
+    - '48'
+    - '49'
+    gdpr_recitals:
+    - '101'
+    - '102'
+    - '103'
+    - '104'
+    - '105'
+    - '106'
+    - '107'
+    - '108'
+    - '109'
+    - '110'
+    - '111'
+    - '112'
+    - '113'
+    - '114'
+    - '115'
+    - '116'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - transfer
+    - third country
+    - adequacy decision
+    - standard contractual clauses
+    - scc
+    - binding corporate rules
+    - bcr
+    - cross-border
+    - international
+    edpb_guidelines: []
+  data_subject_rights:
+    description: Rights of the data subject (general)
+    gdpr_articles:
+    - '12'
+    - '13'
+    - '14'
+    - '15'
+    - '16'
+    - '17'
+    - '18'
+    - '19'
+    - '20'
+    - '21'
+    - '22'
+    - '23'
+    gdpr_recitals:
+    - '58'
+    - '59'
+    - '60'
+    - '61'
+    - '62'
+    - '63'
+    - '64'
+    - '65'
+    - '66'
+    - '67'
+    - '68'
+    - '69'
+    - '70'
+    - '71'
+    - '72'
+    - '73'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - right to access
+    - erasure
+    - rectification
+    - data portability
+    - object
+    - restriction
+    - automated decision
+    - profiling
+    - subject access request
+    - sar
+    - data subject
+    edpb_guidelines: []
+  right_to_erasure:
+    description: Right to erasure / right to be forgotten
+    gdpr_articles:
+    - '17'
+    - '19'
+    gdpr_recitals:
+    - '65'
+    - '66'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - erasure
+    - deletion
+    - right to be forgotten
+    - delete data
+    - remove data
+    edpb_guidelines: []
+  right_to_access:
+    description: Right of access by the data subject
+    gdpr_articles:
+    - '15'
+    gdpr_recitals:
+    - '63'
+    - '64'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - access request
+    - subject access
+    - copy of data
+    - right to access
+    edpb_guidelines: []
+  data_portability:
+    description: Right to data portability
+    gdpr_articles:
+    - '20'
+    gdpr_recitals:
+    - '68'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - portability
+    - machine readable
+    - transfer data
+    - export data
+    edpb_guidelines: []
+  right_to_object:
+    description: Right to object to processing
+    gdpr_articles:
+    - '21'
+    gdpr_recitals:
+    - '69'
+    - '70'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - object
+    - objection
+    - opt out
+    - direct marketing
+    - stop processing
+    edpb_guidelines: []
+  automated_decisions:
+    description: Automated individual decision-making including profiling
+    gdpr_articles:
+    - '22'
+    - 13(2)(f)
+    - 14(2)(g)
+    gdpr_recitals:
+    - '71'
+    - '72'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - automated decision
+    - profiling
+    - algorithm
+    - scoring
+    - automated processing
+    edpb_guidelines: []
+  transparency:
+    description: Transparency and information obligations
+    gdpr_articles:
+    - 5(1)(a)
+    - '12'
+    - '13'
+    - '14'
+    gdpr_recitals:
+    - '39'
+    - '58'
+    - '59'
+    - '60'
+    - '61'
+    - '62'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - transparency
+    - privacy notice
+    - privacy policy
+    - information obligation
+    - inform
+    - fair processing
+    edpb_guidelines: []
+  purpose_limitation:
+    description: Purpose limitation principle
+    gdpr_articles:
+    - 5(1)(b)
+    - 6(4)
+    gdpr_recitals:
+    - '39'
+    - '50'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - purpose limitation
+    - compatible purpose
+    - further processing
+    - repurpose
+    - secondary use
+    edpb_guidelines: []
+  data_minimization:
+    description: Data minimisation principle
+    gdpr_articles:
+    - 5(1)(c)
+    gdpr_recitals:
+    - '39'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - data minimisation
+    - minimization
+    - adequate
+    - relevant
+    - necessary
+    - excessive
+    edpb_guidelines: []
+  storage_limitation:
+    description: Storage limitation and data retention
+    gdpr_articles:
+    - 5(1)(e)
+    - '17'
+    gdpr_recitals:
+    - '39'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - storage limitation
+    - retention
+    - retention period
+    - how long
+    - keep data
+    - delete after
+    edpb_guidelines: []
+  accuracy:
+    description: Accuracy of personal data
+    gdpr_articles:
+    - 5(1)(d)
+    - '16'
+    gdpr_recitals:
+    - '39'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - accuracy
+    - accurate
+    - up to date
+    - rectification
+    - correct data
+    edpb_guidelines: []
+  security:
+    description: Security of processing
+    gdpr_articles:
+    - 5(1)(f)
+    - '32'
+    gdpr_recitals:
+    - '39'
+    - '78'
+    - '83'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - security
+    - encryption
+    - pseudonymisation
+    - technical measures
+    - organisational measures
+    - tom
+    - integrity
+    - confidentiality
+    - availability
+    edpb_guidelines: []
+  accountability:
+    description: Accountability principle and documentation
+    gdpr_articles:
+    - 5(2)
+    - '24'
+    - '25'
+    - '30'
+    gdpr_recitals:
+    - '74'
+    - '75'
+    - '76'
+    - '77'
+    - '78'
+    - '79'
+    - '80'
+    - '81'
+    - '82'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - accountability
+    - demonstrate compliance
+    - record of processing
+    - ropa
+    - documentation
+    - policies
+    edpb_guidelines: []
+  controller_processor:
+    description: Controller and processor obligations
+    gdpr_articles:
+    - '24'
+    - '25'
+    - '26'
+    - '27'
+    - '28'
+    - '29'
+    gdpr_recitals:
+    - '74'
+    - '75'
+    - '76'
+    - '77'
+    - '78'
+    - '79'
+    - '80'
+    - '81'
+    - '82'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - controller
+    - processor
+    - joint controller
+    - data processing agreement
+    - dpa
+    - sub-processor
+    - vendor
+    - representative
+    edpb_guidelines: []
+  dpo:
+    description: Data Protection Officer
+    gdpr_articles:
+    - '37'
+    - '38'
+    - '39'
+    gdpr_recitals:
+    - '97'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - dpo
+    - data protection officer
+    - appoint dpo
+    - designated
+    edpb_guidelines: []
+  special_categories:
+    description: Processing of special categories of personal data
+    gdpr_articles:
+    - '9'
+    - '10'
+    gdpr_recitals:
+    - '51'
+    - '52'
+    - '53'
+    - '54'
+    - '55'
+    - '56'
+    bdsg_sections:
+    - '22'
+    ttdsg_sections: []
+    keywords:
+    - special categories
+    - sensitive data
+    - health data
+    - biometric
+    - genetic
+    - racial
+    - ethnic
+    - political
+    - religious
+    - trade union
+    - sexual orientation
+    - criminal
+    edpb_guidelines: []
+  children:
+    description: Processing personal data of children
+    gdpr_articles:
+    - '8'
+    - 12(1)
+    - 17(1)(f)
+    gdpr_recitals:
+    - '38'
+    - '58'
+    - '65'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - children
+    - child
+    - minor
+    - parental consent
+    - age verification
+    - information society service
+    - under 16
+    - under 13
+    edpb_guidelines: []
+  data_protection_by_design:
+    description: Data protection by design and by default
+    gdpr_articles:
+    - '25'
+    gdpr_recitals:
+    - '78'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - by design
+    - by default
+    - privacy by design
+    - privacy by default
+    - built-in
+    - default settings
+    edpb_guidelines: []
+  supervisory_authority:
+    description: Supervisory authorities and cooperation
+    gdpr_articles:
+    - '51'
+    - '52'
+    - '53'
+    - '54'
+    - '55'
+    - '56'
+    - '57'
+    - '58'
+    - '59'
+    - '60'
+    - '61'
+    - '62'
+    - '63'
+    - '64'
+    - '65'
+    - '66'
+    - '67'
+    - '68'
+    - '69'
+    - '70'
+    - '71'
+    - '72'
+    - '73'
+    - '74'
+    - '75'
+    - '76'
+    gdpr_recitals: []
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - supervisory authority
+    - dpa
+    - enforcement
+    - fine
+    - penalty
+    - investigation
+    - complaint
+    - lead authority
+    edpb_guidelines: []
+  sanctions:
+    description: Administrative fines and penalties
+    gdpr_articles:
+    - '83'
+    - '84'
+    gdpr_recitals:
+    - '148'
+    - '149'
+    - '150'
+    - '151'
+    - '152'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - fine
+    - penalty
+    - sanction
+    - administrative fine
+    - 20 million
+    - 4%
+    - turnover
+    - infringement
+    edpb_guidelines: []
+  employment:
+    description: Employee data processing
+    gdpr_articles:
+    - 6(1)(b)
+    - 6(1)(c)
+    - 6(1)(f)
+    - '9'
+    - '88'
+    gdpr_recitals:
+    - '155'
+    bdsg_sections:
+    - '26'
+    ttdsg_sections: []
+    keywords:
+    - employee
+    - employment
+    - hr data
+    - worker
+    - staff
+    - workplace
+    - applicant
+    - recruitment
+    edpb_guidelines: []
+  direct_marketing:
+    description: Direct marketing
+    gdpr_articles:
+    - 6(1)(f)
+    - 21(2)
+    - 21(3)
+    gdpr_recitals:
+    - '47'
+    - '70'
+    bdsg_sections: []
+    ttdsg_sections:
+    - '25'
+    keywords:
+    - marketing
+    - direct marketing
+    - email marketing
+    - newsletter
+    - advertising
+    - promotional
+    edpb_guidelines: []
+  cookies_tracking:
+    description: Cookies, tracking, and similar technologies
+    gdpr_articles:
+    - 6(1)(a)
+    gdpr_recitals: []
+    bdsg_sections: []
+    ttdsg_sections:
+    - '25'
+    keywords:
+    - cookie
+    - tracking
+    - analytics
+    - pixel
+    - fingerprinting
+    - local storage
+    - session
+    - third-party cookie
+    edpb_guidelines: []
+  data_sharing:
+    description: Sharing personal data with third parties
+    gdpr_articles:
+    - '6'
+    - 13(1)(e)
+    - 13(1)(f)
+    - 14(1)(e)
+    - 14(1)(f)
+    - '26'
+    - '28'
+    gdpr_recitals: []
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - share data
+    - third party
+    - disclose
+    - recipient
+    - joint controller
+    - sub-processor
+    - vendor
+    edpb_guidelines: []
+  research:
+    description: Processing for research and statistical purposes
+    gdpr_articles:
+    - 5(1)(b)
+    - 5(1)(e)
+    - 9(2)(j)
+    - '89'
+    gdpr_recitals:
+    - '33'
+    - '156'
+    - '157'
+    - '158'
+    - '159'
+    - '160'
+    - '161'
+    - '162'
+    - '163'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - research
+    - scientific
+    - statistical
+    - archiving
+    - public interest
+    edpb_guidelines: []
+  material_scope:
+    description: Material and territorial scope; definitions
+    gdpr_articles:
+    - '1'
+    - '2'
+    - '3'
+    - '4'
+    gdpr_recitals:
+    - '1'
+    - '2'
+    - '3'
+    - '4'
+    - '5'
+    - '6'
+    - '7'
+    - '8'
+    - '9'
+    - '10'
+    - '11'
+    - '12'
+    - '13'
+    - '14'
+    - '15'
+    - '16'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - scope
+    - personal data
+    - processing
+    - establishment
+    - territorial
+    edpb_guidelines: []
+  lawfulness_monitoring:
+    description: Processing for tasks in public interest; restrictions
+    gdpr_articles:
+    - '6'
+    - '10'
+    - '23'
+    - '85'
+    - '86'
+    - '87'
+    - '88'
+    - '89'
+    - '90'
+    - '91'
+    gdpr_recitals: []
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - public interest
+    - official authority
+    - member state law
+    - restriction
+    edpb_guidelines: []
+  representatives:
+    description: Representative of controllers/processors not established in the Union
+    gdpr_articles:
+    - '27'
+    gdpr_recitals:
+    - '80'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - representative
+    - non-eu
+    - establishment
+    edpb_guidelines: []
+  records_security:
+    description: Records of processing; processor consultation
+    gdpr_articles:
+    - '30'
+    - '31'
+    - '32'
+    - '33'
+    - '34'
+    gdpr_recitals: []
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - records
+    - ropa
+    - consultation
+    - cooperation processor
+    edpb_guidelines: []
+  certification_codes:
+    description: Certification and codes of conduct
+    gdpr_articles:
+    - '40'
+    - '41'
+    - '42'
+    - '43'
+    gdpr_recitals:
+    - '77'
+    - '81'
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - certification
+    - code of conduct
+    - monitoring body
+    edpb_guidelines: []
+  transfer_tools_detail:
+    description: Appropriate safeguards including BCRs
+    gdpr_articles:
+    - '46'
+    - '47'
+    gdpr_recitals: []
+    bdsg_sections: []
+    ttdsg_sections: []
+    keywords:
+    - appropriate safeguards
+    - binding corporate rules
+    - clauses
+    edpb_guidelines: []
+topic_aliases:
+  legal-basis: legal_basis
+  consent: consent
+  contract: legal_basis
+  legitimate-interest: legal_basis
+  special-categories: special_categories
+  data-subject-rights: data_subject_rights
+  information: transparency
+  transparency: transparency
+  access: right_to_access
+  rectification: accuracy
+  erasure: right_to_erasure
+  restriction: data_subject_rights
+  portability: data_portability
+  object: right_to_object
+  automated-decisions: automated_decisions
+  controller-processor: controller_processor
+  security-of-processing: security
+  security-and-breaches: data_breach
+  notification-to-dpa: data_breach
+  notification-to-subjects: data_breach
+  dpia: dpia
+  dpo: dpo
+  transfers: international_transfer
+  employment: employment
+  children: children
+  direct-marketing: direct_marketing
+  telemedia: cookies_tracking
+  gdpr: material_scope
+  germany: employment

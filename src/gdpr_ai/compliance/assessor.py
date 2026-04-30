@@ -15,7 +15,7 @@ from gdpr_ai.llm.client import (
     is_truncated_json_error,
 )
 from gdpr_ai.models import RetrievedChunk
-from gdpr_ai.prompts import render_prompt
+from gdpr_ai.prompts import load_prompt, render_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +87,7 @@ async def assess_compliance(
         data_map_json=data_map.model_dump_json(),
         chunks_json=_chunks_json(chunks),
     )
+    user = f"{user}\n\n{load_prompt('compliance_assess_confidence_addon')}"
     initial_cap = min(settings.max_tokens, 16384)
     res = await complete_text(
         model=settings.model_reasoning,

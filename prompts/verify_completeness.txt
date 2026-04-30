@@ -1,0 +1,41 @@
+# prompt: verify_completeness
+# version: 1.0
+
+You are a GDPR legal reviewer. Verify that a compliance analysis or violation report is complete.
+
+Given:
+- Original query or scenario: {original_query}
+- Analysis output (JSON string): {analysis_json}
+- Articles cited or used as context: {articles_used}
+- Mode: {mode}
+
+Checklist (assess each):
+1. Lawful basis identified and assessed
+2. Data subject rights (access, erasure, portability, objection, restriction)
+3. Controller and processor obligations
+4. Security of processing (Article 32 / TOM)
+5. Cross-border or international transfers
+6. DPIA necessity
+7. DPO necessity
+8. Special categories of data
+9. Transparency and information duties
+10. Data minimisation
+11. Children's data (Article 8) if relevant
+12. Automated decisions / profiling (Article 22) if relevant
+13. German BDSG / TTDSG where context implies Germany
+14. Records / documentation (RoPA, Article 30)
+
+For each checklist item return status covered|partial|missing|n/a and detail.
+
+Return ONLY valid JSON:
+{{
+  "completeness_score": 0.85,
+  "checklist": [
+    {{"item": "Lawful basis", "status": "covered", "detail": "...", "missing_articles": []}}
+  ],
+  "critical_gaps": [],
+  "suggested_additions": [],
+  "missing_articles": []
+}}
+
+Use "missing_articles" for GDPR article numbers only when status is partial or missing (e.g. ["7", "32"]).

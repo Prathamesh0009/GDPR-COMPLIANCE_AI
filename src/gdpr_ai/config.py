@@ -77,5 +77,62 @@ class Settings(BaseSettings):
         validation_alias="CHROMA_COLLECTION_AI_ACT",
     )
 
+    deterministic_retrieval_enabled: bool = Field(
+        default=True,
+        validation_alias="DETERMINISTIC_RETRIEVAL",
+        description="Use article map + cross-ref + full-text assembly as primary retrieval (v4).",
+    )
+    deterministic_graph_depth: int = Field(
+        default=1,
+        validation_alias="DETERMINISTIC_GRAPH_DEPTH",
+        ge=0,
+        le=3,
+    )
+    deterministic_max_context_tokens: int = Field(
+        default=30000,
+        validation_alias="DETERMINISTIC_MAX_CONTEXT_TOKENS",
+        ge=2000,
+    )
+    deterministic_semantic_fallback: bool = Field(
+        default=True,
+        validation_alias="DETERMINISTIC_SEMANTIC_FALLBACK",
+        description="Merge hybrid Chroma+BM25 results after deterministic full-text chunk.",
+    )
+    verification_enabled: bool = Field(
+        default=True,
+        validation_alias="VERIFICATION_ENABLED",
+        description="Run completeness verification pass after primary reasoning (v4).",
+    )
+    supplementary_reasoning_enabled: bool = Field(
+        default=True,
+        validation_alias="SUPPLEMENTARY_REASONING",
+        description="If verification reports gaps, merge extra chunks and re-run reasoning once.",
+    )
+
+    gdpr_article_map_path: Path = Field(
+        default=Path("data/gdpr_article_map.yaml"),
+        validation_alias="GDPR_ARTICLE_MAP_PATH",
+    )
+    gdpr_cross_references_path: Path = Field(
+        default=Path("data/gdpr_cross_references.yaml"),
+        validation_alias="GDPR_CROSS_REFERENCES_PATH",
+    )
+    gdpr_articles_fulltext_path: Path = Field(
+        default=Path("data/gdpr_articles_fulltext.yaml"),
+        validation_alias="GDPR_ARTICLES_FULLTEXT_PATH",
+    )
+    gdpr_recitals_fulltext_path: Path = Field(
+        default=Path("data/gdpr_recitals_fulltext.yaml"),
+        validation_alias="GDPR_RECITALS_FULLTEXT_PATH",
+    )
+    gdpr_raw_articles_json_path: Path = Field(
+        default=Path("data/raw/gdpr_articles.json"),
+        validation_alias="GDPR_RAW_ARTICLES_JSON_PATH",
+    )
+    gdpr_raw_recitals_json_path: Path = Field(
+        default=Path("data/raw/gdpr_recitals.json"),
+        validation_alias="GDPR_RAW_RECITALS_JSON_PATH",
+    )
+
 
 settings = Settings()

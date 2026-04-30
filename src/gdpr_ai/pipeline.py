@@ -19,8 +19,9 @@ from gdpr_ai.llm.client import (
 )
 from gdpr_ai.logger import log_query
 from gdpr_ai.models import AnalysisReport, ClassifiedTopics, ExtractedEntities, RetrievedChunk
-from gdpr_ai.prompts import render_prompt
-from gdpr_ai.retriever import retrieve
+from gdpr_ai.prompts import load_prompt, render_prompt
+from gdpr_ai.reasoning.verifier import merge_missing_numeric_articles, verify_completeness
+from gdpr_ai.retriever import retrieve, retrieve_gdpr_chunks_by_article_numbers
 
 logger = logging.getLogger(__name__)
 
@@ -150,6 +151,40 @@ async def classify_topics(
     return ct, res
 
 
+def _dedupe_chunks_by_id(chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
+    """Preserve order; drop duplicate chunk ids."""
+    seen: set[str] = set()
+    out: list[RetrievedChunk] = []
+    for c in chunks:
+        if c.chunk_id in seen:
+            continue
+        seen.add(c.chunk_id)
+        out.append(c)
+    return out
+
+
+def _articles_from_chunks(chunks: list[RetrievedChunk]) -> list[str]:
+    """Collect unique numeric article ids referenced in chunk metadata."""
+    found: list[str] = []
+    seen: set[str] = set()
+    import re
+
+    for c in chunks:
+        lbl = str(c.metadata.get("article_number", ""))
+        for m in re.finditer(r"(\d+)", lbl):
+            d = m.group(1)
+            if d not in seen:
+                seen.add(d)
+                found.append(d)
+        assembled = str(c.metadata.get("assembled_articles", ""))
+        for part in assembled.split(","):
+            part = part.strip()
+            if part.isdigit() and part not in seen:
+                seen.add(part)
+                found.append(part)
+    return found
+
+
 def _chunks_for_prompt(chunks: list[RetrievedChunk]) -> str:
     serializable = [
         {
@@ -175,6 +210,7 @@ async def reason_report(
 ) -> tuple[AnalysisReport, LLMResult]:
     """Run the legal reasoning prompt."""
     system = "You output only JSON."
+    addon = load_prompt("reason_confidence_addon")
     user = render_prompt(
         "reason",
         scenario=scenario,
@@ -182,6 +218,7 @@ async def reason_report(
         topics_json=json.dumps(topics.model_dump(), ensure_ascii=False),
         chunks_json=_chunks_for_prompt(chunks),
     )
+    user = f"{user}\n\n{addon}"
     data, res = await _call_stage_json(
         model=settings.model_reasoning,
         system_header=system,
@@ -249,22 +286,57 @@ async def run_pipeline_logged(scenario_text: str) -> tuple[AnalysisReport, str]:
     chunks = retrieve(scenario_text, topics, entities, top_k=settings.top_k)
     lat_retrieve = int((time.perf_counter() - t0) * 1000)
 
+    async def _reason_validate_once() -> tuple[AnalysisReport, int, int]:
+        """Reason, optional verify + supplementary reason, then validate."""
+        nonlocal total_in, total_out, total_cost, chunks
+        working = list(chunks)
+        lat_r = 0
+        tr = time.perf_counter()
+        draft, rr = await reason_report(scenario_text, entities, topics, working)
+        lat_r += int((time.perf_counter() - tr) * 1000)
+        total_in += rr.input_tokens
+        total_out += rr.output_tokens
+        total_cost += rr.cost_eur
+
+        if settings.verification_enabled:
+            try:
+                ver, ver_res = await verify_completeness(
+                    original_query=scenario_text,
+                    analysis_json=json.dumps(draft.model_dump(), ensure_ascii=False),
+                    articles_used=_articles_from_chunks(working),
+                    mode="violation",
+                )
+                total_in += ver_res.input_tokens
+                total_out += ver_res.output_tokens
+                total_cost += ver_res.cost_eur
+                if settings.supplementary_reasoning_enabled:
+                    extra_nums = merge_missing_numeric_articles(ver)
+                    if ver.needs_supplementary_pass and extra_nums:
+                        extra = retrieve_gdpr_chunks_by_article_numbers(extra_nums)
+                        working = _dedupe_chunks_by_id(working + extra)
+                        chunks = working
+                        tr = time.perf_counter()
+                        draft, rr = await reason_report(scenario_text, entities, topics, working)
+                        lat_r += int((time.perf_counter() - tr) * 1000)
+                        total_in += rr.input_tokens
+                        total_out += rr.output_tokens
+                        total_cost += rr.cost_eur
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Verification skipped: %s", exc)
+
+        tv = time.perf_counter()
+        validated, vr = await validate_report_llm(draft, entities, topics, working)
+        lat_v = int((time.perf_counter() - tv) * 1000)
+        total_in += vr.input_tokens
+        total_out += vr.output_tokens
+        total_cost += vr.cost_eur
+        return validated, lat_r, lat_v
+
     last_exc: Exception | None = None
     report: AnalysisReport | None = None
     for attempt in range(2):
         try:
-            t0 = time.perf_counter()
-            draft, rr = await reason_report(scenario_text, entities, topics, chunks)
-            lat_reason = int((time.perf_counter() - t0) * 1000)
-            total_in += rr.input_tokens
-            total_out += rr.output_tokens
-            total_cost += rr.cost_eur
-            t0 = time.perf_counter()
-            validated, vr = await validate_report_llm(draft, entities, topics, chunks)
-            lat_validate = int((time.perf_counter() - t0) * 1000)
-            total_in += vr.input_tokens
-            total_out += vr.output_tokens
-            total_cost += vr.cost_eur
+            validated, lat_reason, lat_validate = await _reason_validate_once()
             _grounding_check(validated, chunks)
             report = validated
             break

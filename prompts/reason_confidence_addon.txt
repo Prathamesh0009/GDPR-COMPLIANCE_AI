@@ -1,0 +1,22 @@
+# add-on appended to the primary reason prompt (do not edit reason.txt)
+
+Additional JSON fields for EVERY violation object (in addition to existing keys):
+- "confidence_level": one of "high", "medium", "low", "uncertain"
+  - high: explicit support in the chunk text provided
+  - medium: supported mainly by recitals or guidance chunks, not a single explicit article clause
+  - low: inferred from general principles without direct clause support in chunks
+  - uncertain: cannot ground; say so honestly
+- "source_articles": list of short labels (e.g. ["Art. 6 GDPR", "Art. 7 GDPR"]) that support the violation
+- "confidence_notes": one sentence explaining the confidence choice
+
+Also add top-level:
+- "analysis_confidence": {{
+    "overall_score": 0.0-1.0,
+    "high_confidence_claims": 0,
+    "medium_confidence_claims": 0,
+    "low_confidence_claims": 0,
+    "uncertain_claims": 0,
+    "disclaimer": "optional string if any uncertain claims exist"
+  }}
+
+If any violation has confidence_level "uncertain", set analysis_confidence.disclaimer to note that a qualified professional should review those points.

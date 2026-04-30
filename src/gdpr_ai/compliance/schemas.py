@@ -6,6 +6,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
+from gdpr_ai.models import AnalysisConfidence, ConfidenceLevel
+
 
 class Sensitivity(StrEnum):
     """Approximate data sensitivity tier."""
@@ -117,6 +119,9 @@ class Finding(BaseModel):
     description: str
     remediation: str | None = None
     technical_guidance: str | None = None
+    confidence_level: ConfidenceLevel | None = None
+    source_articles: list[str] = Field(default_factory=list)
+    confidence_notes: str = ""
 
 
 class ComplianceAssessment(BaseModel):
@@ -127,3 +132,4 @@ class ComplianceAssessment(BaseModel):
     findings: list[Finding]
     summary: str
     data_map: DataMap
+    analysis_confidence: AnalysisConfidence | None = None
