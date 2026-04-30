@@ -237,23 +237,50 @@ Every chunk carries `source`, `source_url`, and `license` metadata for traceabil
 
 Violation analysis now defaults to **deterministic article mapping** (`data/gdpr_article_map.yaml`) plus **cross-reference expansion** (`data/gdpr_cross_references.yaml`), then a **single assembled full-text context chunk** when `data/gdpr_articles_fulltext.yaml` is populated (otherwise text is filled from `data/raw/gdpr_articles.json` after scraping). Hybrid Chroma + BM25 still runs as a **fallback** merge. Set `DETERMINISTIC_RETRIEVAL=false` to use legacy semantic-only retrieval. After scraping, run `uv run python scripts/export_gdpr_fulltext_yaml.py` to build the YAML article store. Eval baselines: run `uv run python tests/run_eval.py` before/after and compare with `uv run python tests/compare_eval.py`.
 
-### Retrieval accuracy (v3 vs v4)
+### Retrieval accuracy
 
-Hand-maintained targets live in `gold/baseline.json`. For a **live** machine-local comparison (writes JSON reports under `gold/`):
+Evaluated on 5 core scenarios (3 violation analysis, 1 compliance assessment, 1 errored). Figures below match `gold/baseline_v3_semantic.json` (**semantic-only** run: `DETERMINISTIC_RETRIEVAL=false`).
+
+| Metric | v3 (semantic retrieval) |
+|--------|-------------------------|
+| Article recall | 95.0% |
+| Article precision | 95.8% |
+| Finding coverage | 100% |
+| Pass / warn / fail | 4 / 0 / 0 |
+| Errors | 1 (SC-C-002) |
+| Avg cost per run | ~€0.70 |
+
+Hand-maintained regression targets also live in `gold/baseline.json`. Reproduce the v3 baseline (semantic retrieval, 5 default scenarios):
 
 ```bash
 DETERMINISTIC_RETRIEVAL=false uv run python tests/run_eval.py --output gold/baseline_v3_semantic.json --yes
-DETERMINISTIC_RETRIEVAL=true VERIFICATION_ENABLED=true uv run python tests/run_eval.py --output gold/eval_v4_accuracy.json --yes
+```
+
+Default eval (5 core scenarios, ~€0.40):
+
+```bash
+uv run python tests/run_eval.py --output gold/eval_results.json --yes
+```
+
+Full suite (all 50 scenarios, ~€3.84):
+
+```bash
+uv run python tests/run_eval.py --all --output gold/eval_full.json --yes
+```
+
+Compare two JSON reports (overall + per-scenario deltas):
+
+```bash
 uv run python tests/compare_eval.py gold/baseline_v3_semantic.json gold/eval_v4_accuracy.json
 ```
 
-| Metric | v3 targets (`gold/baseline.json`) | v4 (fill from `eval_v4_accuracy.json`) | Improvement |
-|--------|-----------------------------------|----------------------------------------|-------------|
-| Article precision (violation) | 91% | — | Run eval to measure |
-| Article recall (violation) | 87% | — | Run eval to measure |
-| Finding coverage (compliance) | 85% | — | Run eval to measure |
+Deterministic (v4) run for side-by-side comparison:
 
-After each eval run, read `violation_analysis_summary` and `compliance_assessment_summary` in the output JSON for averages.
+```bash
+DETERMINISTIC_RETRIEVAL=true VERIFICATION_ENABLED=true uv run python tests/run_eval.py --output gold/eval_v4_accuracy.json --yes
+```
+
+After each eval run, read `violation_analysis_summary` and `compliance_assessment_summary` in the output JSON for mode-specific averages.
 
 ---
 
